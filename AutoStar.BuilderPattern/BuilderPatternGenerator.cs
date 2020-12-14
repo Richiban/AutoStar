@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using AutoStar.Common;
 using AutoStar.Model;
+using System;
 
 namespace AutoStar.BuilderPattern
 {
@@ -10,20 +11,22 @@ namespace AutoStar.BuilderPattern
     {
         protected override string GeneratorName => nameof(BuilderPattern);
 
-        public override GeneratedFile GeneratePatternFor(ClassDeclarationSyntax classDeclaration, string usings, string @namespace)
+        public override GeneratedFile GeneratePatternFor(INamedTypeSymbol classSymbol, string usings, string @namespace)
         {
             var converter = new RecordConverter();
 
-            var record = converter.ClassToRecord(classDeclaration);
+            throw new NotImplementedException();
 
-            var recordClass = converter.LowerRecordToClass(record);
+            //var record = converter.ClassToRecord(classSymbol.);
 
-            var typeFile = new TypeFile(usings, recordClass)
-            {
-                NamespaceName = @namespace
-            };
+            //var recordClass = converter.LowerRecordToClass(record);
 
-            return new GeneratedFile(typeFile, GeneratorName);
+            //var typeFile = new TypeFile(usings, recordClass)
+            //{
+            //    NamespaceName = @namespace
+            //};
+
+            //return new GeneratedFile(typeFile, GeneratorName);
         }
     }
 }

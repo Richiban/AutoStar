@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Text;
 using AutoStar.Model;
 using System.Text;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace AutoStar.Common
 {
@@ -16,8 +17,9 @@ namespace AutoStar.Common
         public string GeneratorName { get; }
         public TypeFile TypeFile { get; }
 
-        public void AddTo(GeneratorExecutionContext context)
+        public Compilation AddTo(GeneratorExecutionContext context)
         {
+            var options = ((CSharpCompilation)context.Compilation).SyntaxTrees[0].Options as CSharpParseOptions;
             var typeName = TypeFile.TypeDeclaration.Name;
 
             var codeBuilder = new CodeBuilder();
@@ -26,6 +28,8 @@ namespace AutoStar.Common
 
             context.AddSource($"{typeName}.{GeneratorName}.g.cs",
                 SourceText.From(codeBuilder.ToString(), Encoding.UTF8));
+
+            return context.Compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(codeBuilder.ToString(), Encoding.UTF8), options));
         }
     }
 }

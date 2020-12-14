@@ -26,9 +26,9 @@ namespace AutoStar.Tests
 
             var classDeclaration = ns.ChildNodes().OfType<ClassDeclarationSyntax>().Single();
 
-            var result = sut.GeneratePatternFor(classDeclaration, usings, ns.Name.ToString());
+            //var result = sut.GeneratePatternFor(classDeclaration, usings, ns.Name.ToString());
 
-            Console.WriteLine(result);
+            //Console.WriteLine(result);
         }
 
         private const string sampleCode = @"

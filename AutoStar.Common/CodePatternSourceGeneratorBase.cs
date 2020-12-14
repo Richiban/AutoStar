@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using AutoStar.Model;
+using System.Diagnostics;
 
 namespace AutoStar.Common
 {
@@ -12,44 +13,56 @@ namespace AutoStar.Common
 
         public void Execute(GeneratorExecutionContext context)
         {
-            InjectAttribute(context);
+            var compilation = InjectAttribute(context);
+
+            var attributeSymbol = compilation.GetTypeByMetadataName(AttributeToInject.TypeDeclaration.Name)!;
 
             foreach (var syntaxTree in context.Compilation.SyntaxTrees)
             {
                 var root = syntaxTree.GetRoot();
                 var usings = (root as CompilationUnitSyntax)!.Usings.ToString();
 
-                foreach (var classDeclaration in GetCandidateClasses(root))
+                foreach (var classDeclaration in GetCandidateClasses(root, context.Compilation, attributeSymbol))
                 {
-                    var namespaceName = classDeclaration
-                            .FindParent<NamespaceDeclarationSyntax>()
-                            ?.Name.ToString();
+                    var namespaceName = classDeclaration.ContainingNamespace.ToDisplayString();
 
                     GeneratePatternFor(classDeclaration, usings, namespaceName).AddTo(context);
                 }
             }
         }
 
-        private IEnumerable<ClassDeclarationSyntax> GetCandidateClasses(SyntaxNode root)
+        private IEnumerable<INamedTypeSymbol> GetCandidateClasses(SyntaxNode root, Compilation compilation, INamedTypeSymbol attributeSymbol)
         {
-            return root.DescendantNodes()
+            var candidateClasses =  root.DescendantNodes()
                 .OfType<ClassDeclarationSyntax>()
-                .Where(c =>
-                    c.AttributeLists
-                     .SelectMany(list => list.Attributes)
-                     .Any(attr => attr.Name.ToString() == $"{nameof(AutoStar)}.{GeneratorName}"));
+                ;
+
+            foreach (var @class in candidateClasses)
+            {
+                var model = compilation.GetSemanticModel(@class.SyntaxTree);
+                var classSymbol = model.GetDeclaredSymbol(@class) as INamedTypeSymbol;
+
+                //if (classSymbol.GetAttributes().Any(ad => ad.AttributeClass.Equals(attributeSymbol, SymbolEqualityComparer.Default)))
+                if (classSymbol.GetAttributes().Any(ad => ad.AttributeClass.MetadataName.Equals(attributeSymbol.MetadataName)))
+                {
+                    yield return classSymbol;
+                }
+            }
         }
 
-        private void InjectAttribute(GeneratorExecutionContext context)
+        private Compilation InjectAttribute(GeneratorExecutionContext context)
         {
             var attributeToInject = new GeneratedFile(AttributeToInject, GeneratorName);
 
-            attributeToInject.AddTo(context);
+            return attributeToInject.AddTo(context);
         }
 
-        public void Initialize(GeneratorInitializationContext context)
+        public virtual void Initialize(GeneratorInitializationContext context)
         {
-            // No initialization required for this one
+            //if (!Debugger.IsAttached)
+            //{
+            //    Debugger.Launch();
+            //}
         }
 
         public virtual TypeFile AttributeToInject =>
@@ -63,9 +76,9 @@ namespace AutoStar.Common
                     BaseClass = "Attribute"
                 })
             {
-                NamespaceName = nameof(AutoStar)
+                //NamespaceName = nameof(AutoStar)
             };
 
-        public abstract GeneratedFile GeneratePatternFor(ClassDeclarationSyntax classDeclaration, string usings, string @namespace);
+        public abstract GeneratedFile GeneratePatternFor(INamedTypeSymbol classSymbol, string usings, string @namespace);
     }
 }

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using AutoStar;
+using System;
 namespace Sample
 {
     partial class Service
     {
-        public Service(Guid data)
+        public Service(System.Guid data)
         {
             this._data = data;
         }

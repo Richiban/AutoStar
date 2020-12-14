@@ -2,7 +2,7 @@
 
 namespace Sample
 {
-    [AutoStar.PrimaryConstructor]
+    [PrimaryConstructor]
     partial class Service
     {
         private readonly Guid _data;
@@ -16,9 +16,9 @@ namespace Sample
         {
             Console.WriteLine("==== Auto-constructor Validation ====");
 
-            var myDataClass = new Service(Guid.NewGuid());
+            //var myDataClass = new Service(Guid.NewGuid());
 
-            Console.WriteLine(myDataClass.PrintData());
+            //Console.WriteLine(myDataClass.PrintData());
         }
     }
 }
