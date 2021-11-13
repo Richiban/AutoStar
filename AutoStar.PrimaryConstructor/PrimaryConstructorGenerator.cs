@@ -1,49 +1,93 @@
-﻿using AutoStar.Common;
-using AutoStar.Model;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
-using System.Linq;
 
 namespace AutoStar.PrimaryConstructor
 {
     [Generator]
-    public class PrimaryConstructorGenerator : CodePatternSourceGeneratorBase
+    public class PrimaryConstructorGenerator : ISourceGenerator
     {
-        protected override string GeneratorName => nameof(PrimaryConstructor);
+        private PrimaryConstructorAttributeDefinition _cmdrAttribute = null!;
 
-        private static string ToCamelCase(string name)
+        public void Initialize(GeneratorInitializationContext context)
         {
-            name = name.TrimStart('_');
+            _cmdrAttribute = new PrimaryConstructorAttributeDefinition();
 
-            return name.Substring(0, 1).ToLowerInvariant() + name.Substring(1);
+            context.RegisterForPostInitialization(InjectStaticSourceFiles);
+
+            context.RegisterForSyntaxNotifications(
+                () => new SyntaxReceiver(_cmdrAttribute));
         }
 
-        public override GeneratedFile GeneratePatternFor(INamedTypeSymbol classSymbol, string usings, string @namespace)
+        private void InjectStaticSourceFiles(
+            GeneratorPostInitializationContext postInitializationContext)
         {
-            var fieldList = classSymbol.GetMembers().OfType<IFieldSymbol>()
-                .Where(x => x.CanBeReferencedByName && x.IsReadOnly)
-                .Select(it => new { Type = it.Type.ToDisplayString(), ParameterName = ToCamelCase(it.Name), it.Name })
-                .ToList();
+            var cmdrAttributeFileGenerator =
+                new AttributeFileGenerator(_cmdrAttribute);
 
-            var parameters = fieldList.Select(it => new Parameter(it.ParameterName, it.Type)).ToList();
-            var assignments = fieldList.Select(field => new AssignmentStatement($"this.{field.Name}", field.ParameterName)).ToList();
-            var className = classSymbol.Name;
+            postInitializationContext.AddSource(
+                cmdrAttributeFileGenerator.FileName,
+                cmdrAttributeFileGenerator.GetCode());
+        }
 
-            var typeFile = new TypeFile(usings, new ClassDeclaration(className)
+        public void Execute(GeneratorExecutionContext context)
+        {
+            var diagnostics = new CustomDiagnostics(context);
+
+            try
             {
-                IsPartial = true,
-                Constructor = new Constructor.BlockConstructor(className)
+                if (context.SyntaxReceiver is not SyntaxReceiver receiver ||
+                    receiver.CandidateClasses.Count == 0)
                 {
-                    Parameters = parameters,
-                    Statements = assignments
+                    return;
                 }
-            })
-            {
-                NamespaceName = @namespace
-            };
 
-            return new GeneratedFile(typeFile, GeneratorName);
+                var (models, failures) = new ModelBuilder(_cmdrAttribute)
+                    .BuildFrom(receiver.CandidateClasses)
+                    .SeparateResults();
+
+                diagnostics.ReportMethodFailures(failures);
+
+                foreach (var model in models)
+                {
+                    context.AddCodeFile(new PrimaryConstructorClassFileGenerator(model));
+                }
+            }
+            catch (Exception ex)
+            {
+                diagnostics.ReportUnknownError(ex);
+            }
+        }
+
+        internal class SyntaxReceiver : ISyntaxReceiver
+        {
+            private readonly PrimaryConstructorAttributeDefinition _attributeDefinition;
+
+            public SyntaxReceiver(PrimaryConstructorAttributeDefinition attributeDefinition)
+            {
+                _attributeDefinition = attributeDefinition;
+            }
+
+            public IList<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
+
+            public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+            {
+                if (syntaxNode is ClassDeclarationSyntax classDeclarationSyntax)
+                {
+                    var attrs = classDeclarationSyntax.AttributeLists
+                        .SelectMany(x => x.Attributes)
+                        .ToList();
+
+                    if (!attrs.Any(x => x.Name.ToString() == _attributeDefinition.ShortName))
+                    {
+                        return;
+                    }
+
+                    CandidateClasses.Add(classDeclarationSyntax);
+                }
+            }
         }
     }
 }

@@ -16,9 +16,9 @@ namespace Sample
         {
             Console.WriteLine("==== Auto-constructor Validation ====");
 
-            //var myDataClass = new Service(Guid.NewGuid());
-
-            //Console.WriteLine(myDataClass.PrintData());
+            // var myDataClass = new Service(Guid.NewGuid());
+            //
+            // Console.WriteLine(myDataClass.PrintData());
         }
     }
 }
