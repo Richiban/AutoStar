@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace AutoStar.PrimaryConstructor
+namespace AutoStar.EnumClass
 {
     public class EnumClassModel
     {

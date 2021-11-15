@@ -1,4 +1,4 @@
-﻿namespace AutoStar.PrimaryConstructor
+﻿namespace AutoStar.EnumClass
 {
     class ErrorId
     {
@@ -14,8 +14,8 @@
             return _value;
         }
 
-        public static ErrorId MustBePartial { get; } = new("ASPC0001");
-        public static ErrorId MustNotHaveConstructors { get; } = new("ASPC0002");
-        public static ErrorId Unknown { get; } = new("ASPC0000");
+        public static ErrorId MustBePartial { get; } = new("ASEC0001");
+        public static ErrorId MustNotHaveConstructors { get; } = new("ASEC0002");
+        public static ErrorId Unknown { get; } = new("ASEC0000");
     }
 }

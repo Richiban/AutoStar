@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
-namespace AutoStar.Model
+namespace AutoStar.BuilderPattern.Model
 {
     public class Visibility : IWriteableCode
     {

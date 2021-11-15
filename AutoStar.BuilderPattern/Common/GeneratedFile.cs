@@ -1,10 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Text;
-using AutoStar.Model;
+﻿using System;
 using System.Text;
+using AutoStar.BuilderPattern.Model;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 
-namespace AutoStar.Common
+namespace AutoStar.BuilderPattern.Common
 {
     public class GeneratedFile
     {

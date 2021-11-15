@@ -1,4 +1,6 @@
-﻿namespace AutoStar.BuilderPattern
+﻿using System;
+
+namespace AutoStar.BuilderPattern.InputModels
 {
     public class RecordProperty
     {

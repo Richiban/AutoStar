@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using AutoStar.BuilderPattern.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using AutoStar.Model;
-using System.Diagnostics;
 
-namespace AutoStar.Common
+namespace AutoStar.BuilderPattern.Common
 {
     public abstract class CodePatternSourceGeneratorBase : ISourceGenerator
     {

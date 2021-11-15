@@ -1,6 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
 
-namespace AutoStar.Model
+namespace AutoStar.BuilderPattern.Model
 {
     /// <summary>
     /// A representation of a C# file containing a single namespace containing a single type declaration

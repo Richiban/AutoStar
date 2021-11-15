@@ -1,4 +1,4 @@
-﻿namespace AutoStar.PrimaryConstructor
+﻿namespace AutoStar.EnumClass
 {
     internal abstract class CodeFileGenerator
     {

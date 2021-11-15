@@ -1,10 +1,10 @@
-﻿namespace AutoStar.PrimaryConstructor
+﻿namespace AutoStar.EnumClass
 {
     internal class AttributeFileGenerator
     {
-        private readonly PrimaryConstructorAttributeDefinition _attributeDefinition;
+        private readonly EnumClassAttributeDefinition _attributeDefinition;
 
-        public AttributeFileGenerator(PrimaryConstructorAttributeDefinition attributeDefinition)
+        public AttributeFileGenerator(EnumClassAttributeDefinition attributeDefinition)
         {
             _attributeDefinition = attributeDefinition;
         }

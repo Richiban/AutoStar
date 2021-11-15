@@ -1,13 +1,13 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using AutoStar.PrimaryConstructor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using Shouldly;
 
-namespace AutoStar.PimaryConstructor.Tests
+namespace AutoStar.EnumClass.Tests
 {
     [TestFixture]
     internal class GeneratorTests
@@ -26,14 +26,7 @@ public partial class TestClass
 
             diagnostics.ShouldBeEmpty();
 
-            var fileNames = outputCompilation.SyntaxTrees.Select(s => s.FilePath);
-
-            outputCompilation.SyntaxTrees.Count().ShouldBe(3,
-                $"We expected four syntax trees: the original one plus the two we generated. Found: {string.Join(",\n", fileNames)}");
-
-            var cmdrAttributeFile = GetSourceFile(outputCompilation, "EnumClassAttribute.g.cs");
-
-            var src = cmdrAttributeFile.GetText().ToString();
+            var src = GetSourceFile(outputCompilation, "EnumClassAttribute.cs").GetText().ToString();
 
             src.ShouldBe(
                 @"using System;
@@ -41,6 +34,25 @@ public partial class TestClass
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
 public sealed class EnumClassAttribute : Attribute
 {}");
+        }
+        
+        [Test]
+        public void EnumClassWithNoInnerClassesResultsInNoGeneratedFile()
+        {
+            var source = @"
+[EnumClass]
+public partial class TestClass
+{
+}
+";
+
+            var (outputCompilation, diagnostics) = RunGenerator(source);
+
+            diagnostics.ShouldBeEmpty();
+
+            outputCompilation.SyntaxTrees.Count().ShouldBe(2);
+            
+            outputCompilation.SyntaxTrees.Select(s => s.FilePath).ShouldBe(new [] { "", @"AutoStar.EnumClass\AutoStar.EnumClass.EnumClassGenerator\EnumClassAttribute.cs" });
         }
 
         [Test]
@@ -54,6 +66,9 @@ namespace TestSamples
     [EnumClass]
     public class TestClass
     {
+        class InnerClass
+        {
+        }
     }
 }
 ";
@@ -64,7 +79,7 @@ namespace TestSamples
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
             diagnostic.Id.ShouldBe("ASEC0001");
 
-            diagnostic.GetMessage().ShouldBe("Class TestClass must be partial to use the EnumClass attribute");
+            diagnostic.GetMessage().ShouldBe("The class TestClass must be partial in order to use the EnumClass attribute");
         }
 
         [Test]
@@ -79,6 +94,10 @@ namespace TestSamples
     public partial class TestClass
     {
         public TestClass() {}
+
+        class InnerClass
+        {
+        }
     }
 }
 ";
@@ -89,7 +108,7 @@ namespace TestSamples
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
             diagnostic.Id.ShouldBe("ASEC0002");
 
-            diagnostic.GetMessage().ShouldBe("Class TestClass must not define any constructors in order to use the EnumClass attribute");
+            diagnostic.GetMessage().ShouldBe("The class TestClass must not define any constructors in order to use the EnumClass attribute");
         }
 
         [Test]
@@ -156,7 +175,7 @@ namespace TestSamples
                 },
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
 
-            var generator = new PrimaryConstructorGenerator();
+            var generator = new EnumClassGenerator();
 
             var driver = CSharpGeneratorDriver.Create(generator)
                 .RunGeneratorsAndUpdateCompilation(

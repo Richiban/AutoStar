@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace AutoStar.Model
+namespace AutoStar.BuilderPattern.Model
 {
     public static class Extensions
     {

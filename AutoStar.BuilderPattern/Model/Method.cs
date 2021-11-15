@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AutoStar.Model
+namespace AutoStar.BuilderPattern.Model
 {
     public class MethodDeclaration : IWriteableCode
     {

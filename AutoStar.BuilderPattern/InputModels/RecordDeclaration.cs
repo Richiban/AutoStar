@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace AutoStar.BuilderPattern
+namespace AutoStar.BuilderPattern.InputModels
 {
     public class RecordDeclaration
     {

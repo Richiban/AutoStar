@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\AutoStar.PrimaryConstructor\AutoStar.PrimaryConstructor.csproj" />
+        <ProjectReference Include="..\AutoStar.EnumClass\AutoStar.EnumClass.csproj" />
     </ItemGroup>
 
 </Project>

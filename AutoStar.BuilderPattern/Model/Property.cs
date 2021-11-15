@@ -1,6 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
 
-namespace AutoStar.Model
+namespace AutoStar.BuilderPattern.Model
 {
     public class Property : IWriteableCode
     {

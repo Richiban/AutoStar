@@ -5,14 +5,16 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace AutoStar.PrimaryConstructor
+namespace AutoStar.EnumClass
 {
     internal class ModelBuilder
     {
-        private readonly PrimaryConstructorAttributeDefinition _attributeDefinition;
+        private readonly EnumClassAttributeDefinition _attributeDefinition;
         private readonly Compilation _compilation;
 
-        public ModelBuilder(PrimaryConstructorAttributeDefinition attributeDefinition, Compilation compilation)
+        public ModelBuilder(
+            EnumClassAttributeDefinition attributeDefinition,
+            Compilation compilation)
         {
             _attributeDefinition = attributeDefinition;
             _compilation = compilation;
@@ -22,41 +24,46 @@ namespace AutoStar.PrimaryConstructor
             IEnumerable<ClassDeclarationSyntax> candidateClasses) =>
             candidateClasses.Select(Map).ToImmutableArray();
 
-        private MaybeResult<ModelFailure, EnumClassModel> Map(ClassDeclarationSyntax classDeclaration)
+        private MaybeResult<ModelFailure, EnumClassModel> Map(
+            ClassDeclarationSyntax classDeclaration)
         {
             var model = _compilation.GetSemanticModel(classDeclaration.SyntaxTree);
 
-            var classSymbol = ModelExtensions.GetDeclaredSymbol(model, classDeclaration) as INamedTypeSymbol;
-
-            if (classSymbol is null)
+            if (ModelExtensions.GetDeclaredSymbol(model, classDeclaration) is not
+                INamedTypeSymbol classSymbol)
                 return new ModelFailure(
                     ErrorId.Unknown,
-                    $"Unknown problem with class {classDeclaration.Identifier}",
+                    ErrorMessages.Unknown,
                     classDeclaration.GetLocation());
 
             if (!ClassHasCorrectAttribute(classSymbol))
                 return new MaybeResult<ModelFailure, EnumClassModel>.None();
 
-            if (GetReadonlyFields(classSymbol) is not {Count: > 0} fields)
+            if (GetInnerClasses(classDeclaration) is not { Count: > 0 } innerClasses)
                 return new MaybeResult<ModelFailure, EnumClassModel>.None();
 
             if (!ClassIsPartial(classDeclaration))
                 return new ModelFailure(
                     ErrorId.MustBePartial,
-                    $"Class {classDeclaration.Identifier} must be partial", classDeclaration.GetLocation());
+                    ErrorMessages.MustBePartial(
+                        classDeclaration.Identifier.ToString(),
+                        _attributeDefinition.ShortName),
+                    classDeclaration.GetLocation());
 
             if (ClassHasExistingConstructors(classDeclaration))
                 return new ModelFailure(
                     ErrorId.MustNotHaveConstructors,
-                    $"Class {classDeclaration.Identifier} must not define any constructors",
+                    ErrorMessages.MustNotHaveConstructors(
+                        classDeclaration.Identifier.ToString(),
+                        _attributeDefinition.ShortName),
                     classDeclaration.GetLocation());
 
-            return new EnumClassModel(classSymbol.Name, classDeclaration, fields);
+            return new EnumClassModel(classSymbol.Name, classDeclaration, innerClasses);
         }
 
-        private IReadOnlyList<FieldModel> GetReadonlyFields(INamedTypeSymbol classSymbol) => classSymbol.GetMembers()
-            .OfType<IFieldSymbol>().Where(f => f.IsReadOnly).Select(f => new FieldModel(IdentifierName.Parse(f.Name), f.Type))
-            .ToList();
+        private IReadOnlyList<ClassDeclarationSyntax> GetInnerClasses(
+            ClassDeclarationSyntax classSymbol) =>
+            classSymbol.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList();
 
         private bool ClassIsPartial(ClassDeclarationSyntax declaration)
         {
@@ -68,7 +75,8 @@ namespace AutoStar.PrimaryConstructor
             return classSymbol.GetAttributes().Any(_attributeDefinition.IsMatch);
         }
 
-        private static bool ClassHasExistingConstructors(ClassDeclarationSyntax classSymbol)
+        private static bool ClassHasExistingConstructors(
+            ClassDeclarationSyntax classSymbol)
         {
             return classSymbol.Members.OfType<ConstructorDeclarationSyntax>().Any();
         }

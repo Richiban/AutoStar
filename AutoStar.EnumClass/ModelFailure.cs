@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 
-namespace AutoStar.PrimaryConstructor
+namespace AutoStar.EnumClass
 {
     internal class ModelFailure
     {

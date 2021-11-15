@@ -3,9 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>Latest</LangVersion>
-    <RootNamespace>AutoStar.PrimaryConstructor</RootNamespace>
-    <AssemblyName>AutoStar.PrimaryConstructor</AssemblyName>
+    <RootNamespace>AutoStar.EnumClass</RootNamespace>
+    <AssemblyName>AutoStar.EnumClass</AssemblyName>
     <Nullable>enable</Nullable>
+    <IsPackable>False</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>

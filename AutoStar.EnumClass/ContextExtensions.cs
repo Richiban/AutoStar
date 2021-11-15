@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace AutoStar.PrimaryConstructor
+namespace AutoStar.EnumClass
 {
     internal static class ContextExtensions
     {

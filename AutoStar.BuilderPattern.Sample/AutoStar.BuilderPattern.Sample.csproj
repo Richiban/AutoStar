@@ -11,6 +11,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\AutoStar.BuilderPattern\AutoStar.BuilderPattern.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <PackageReference Include="Microsoft.Net.Compilers.Toolset" Version="4.0.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
 </Project>

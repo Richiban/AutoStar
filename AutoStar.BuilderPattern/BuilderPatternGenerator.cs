@@ -1,8 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using AutoStar.Common;
-using AutoStar.Model;
 using System;
+using AutoStar.BuilderPattern.Common;
 
 namespace AutoStar.BuilderPattern
 {

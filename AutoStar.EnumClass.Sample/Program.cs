@@ -2,20 +2,6 @@
 
 namespace Sample
 {
-    [EnumClass]
-    partial class Service
-    {
-        public partial class TypeA
-        {
-            
-        }
-
-        public partial class TypeB
-        {
-            
-        }
-    }
-
     class Program
     {
         static void Main(string[] args)

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace AutoStar.PrimaryConstructor
+namespace AutoStar.EnumClass
 {
     internal static class EnumerableExtensions
     {

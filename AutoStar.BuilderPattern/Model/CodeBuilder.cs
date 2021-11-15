@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace AutoStar.Model
+namespace AutoStar.BuilderPattern.Model
 {
     public class CodeBuilder
     {
