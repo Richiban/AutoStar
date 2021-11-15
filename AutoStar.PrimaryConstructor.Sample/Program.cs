@@ -6,8 +6,12 @@ namespace Sample
     partial class Service
     {
         private readonly Guid _data;
+        private readonly string _name;
 
-        public string PrintData() => _data.ToString();
+        public override string ToString()
+        {
+            return $"{nameof(Service)}: {_name}\n{_data}";
+        }
     }
 
     class Program
@@ -16,9 +20,9 @@ namespace Sample
         {
             Console.WriteLine("==== Auto-constructor Validation ====");
 
-            // var myDataClass = new Service(Guid.NewGuid());
-            //
-            // Console.WriteLine(myDataClass.PrintData());
+            var myDataClass = new Service(Guid.NewGuid(), "srtras");
+            
+            Console.WriteLine(myDataClass);
         }
     }
 }

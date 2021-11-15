@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,11 +20,13 @@ namespace AutoStar.PrimaryConstructor
         {
             var root = _model.ClassDeclaration.SyntaxTree.GetRoot();
 
+            var usings = root.DescendantNodes().OfType<UsingDirectiveSyntax>().ToList();
+
             var newClassSyntax = CreateNewClassSyntax();
 
             if (GetNamespace(root) is { } namespaceDeclaration)
             {
-                return ToFullString(NamespaceWithNewClass(namespaceDeclaration, newClassSyntax));
+                return ToFullString(NamespaceWithNewClass(namespaceDeclaration, newClassSyntax, usings));
             }
 
             return ToFullString(newClassSyntax);
@@ -33,11 +36,13 @@ namespace AutoStar.PrimaryConstructor
             newClassSyntax.SyntaxTree.GetRoot().NormalizeWhitespace().ToFullString();
 
         private static NamespaceDeclarationSyntax NamespaceWithNewClass(
-            NamespaceDeclarationSyntax namespaceDeclaration, MemberDeclarationSyntax newClassSyntax) =>
+            NamespaceDeclarationSyntax namespaceDeclaration, MemberDeclarationSyntax newClassSyntax,
+            List<UsingDirectiveSyntax> usingDirectives) =>
             namespaceDeclaration.WithMembers(SyntaxFactory.List(new[]
-            {
-                newClassSyntax
-            }));
+                {
+                    newClassSyntax
+                }))
+                .WithUsings(SyntaxFactory.List(usingDirectives));
 
         private static NamespaceDeclarationSyntax? GetNamespace(SyntaxNode root) =>
             root.DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault();
@@ -52,24 +57,40 @@ namespace AutoStar.PrimaryConstructor
         {
             var constructorDeclarationSyntax =
                 SyntaxFactory.ConstructorDeclaration(SyntaxFactory.Identifier(_model.ClassName))
-                    .WithBody(SyntaxFactory.Block())
+                    .WithBody(GetConstructorBody())
                     .WithParameterList(GetParameterList())
                     .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
 
             return constructorDeclarationSyntax;
         }
 
+        private BlockSyntax GetConstructorBody()
+        {
+            var expressionStatementSyntax = _model.ReadonlyFields.Select(GetFieldAssignment);
+
+            return SyntaxFactory.Block(SyntaxFactory.List(expressionStatementSyntax));
+        }
+
+        private ExpressionStatementSyntax GetFieldAssignment(FieldModel fieldModel)
+        {
+            var left = SyntaxFactory.IdentifierName(fieldModel.Name.Original);
+            var right = SyntaxFactory.IdentifierName(fieldModel.Name.ToParameterNaming());
+
+            return SyntaxFactory.ExpressionStatement(
+                SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression, left, right));
+        }
+
         private ParameterListSyntax GetParameterList()
         {
             var parameters = _model.ReadonlyFields.Select(MapParameter).ToArray();
-            
+
             return SyntaxFactory.ParameterList(SyntaxFactory.SeparatedList(parameters));
         }
 
         private static ParameterSyntax MapParameter(FieldModel field)
         {
             var identifier = SyntaxFactory.Identifier(field.Name.ToParameterNaming());
-            
+
             return SyntaxFactory.Parameter(identifier)
                 .WithType(SyntaxFactory.IdentifierName(field.Type.Name));
         }
