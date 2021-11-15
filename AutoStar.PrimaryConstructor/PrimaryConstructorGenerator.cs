@@ -44,7 +44,7 @@ namespace AutoStar.PrimaryConstructor
                     return;
                 }
 
-                var (models, failures) = new ModelBuilder(_cmdrAttribute)
+                var (models, failures) = new ModelBuilder(_cmdrAttribute, context.Compilation)
                     .BuildFrom(receiver.CandidateClasses)
                     .SeparateResults();
 
@@ -80,12 +80,7 @@ namespace AutoStar.PrimaryConstructor
                         .SelectMany(x => x.Attributes)
                         .ToList();
 
-                    if (!attrs.Any(x => x.Name.ToString() == _attributeDefinition.ShortName))
-                    {
-                        return;
-                    }
-
-                    CandidateClasses.Add(classDeclarationSyntax);
+                    if (attrs.Any(_attributeDefinition.Matches)) CandidateClasses.Add(classDeclarationSyntax);
                 }
             }
         }

@@ -2,7 +2,12 @@
 {
     internal abstract class CodeFileGenerator
     {
-        public abstract string FileName { get; }
+        protected CodeFileGenerator(string fileName)
+        {
+            FileName = fileName;
+        }
+
         public abstract string GetCode();
+        public string FileName { get; }
     }
 }

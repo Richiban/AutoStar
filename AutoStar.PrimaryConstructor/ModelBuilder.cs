@@ -2,45 +2,75 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.PrimaryConstructor
 {
-    class ModelBuilder
+    internal class ModelBuilder
     {
-        private readonly PrimaryConstructorAttributeDefinition _cmdrAttribute;
+        private readonly PrimaryConstructorAttributeDefinition _attributeDefinition;
         private readonly Compilation _compilation;
 
-        public ModelBuilder(PrimaryConstructorAttributeDefinition cmdrAttribute, Compilation compilation)
+        public ModelBuilder(PrimaryConstructorAttributeDefinition attributeDefinition, Compilation compilation)
         {
-            _cmdrAttribute = cmdrAttribute;
+            _attributeDefinition = attributeDefinition;
             _compilation = compilation;
         }
 
-        public ImmutableArray<Result<ModelFailure, ClassModel>> BuildFrom(
-            IEnumerable<ClassDeclarationSyntax> candidateClasses)
+        public ImmutableArray<MaybeResult<ModelFailure, ClassModel>> BuildFrom(
+            IEnumerable<ClassDeclarationSyntax> candidateClasses) =>
+            candidateClasses.Select(Map).ToImmutableArray();
+
+        private MaybeResult<ModelFailure, ClassModel> Map(ClassDeclarationSyntax classDeclaration)
         {
-            return candidateClasses.Select(Map).ToImmutableArray();
+            var model = _compilation.GetSemanticModel(classDeclaration.SyntaxTree);
+
+            var classSymbol = ModelExtensions.GetDeclaredSymbol(model, classDeclaration) as INamedTypeSymbol;
+
+            if (classSymbol is null)
+                return new ModelFailure(
+                    ErrorId.Unknown,
+                    $"Unknown problem with class {classDeclaration.Identifier}",
+                    classDeclaration.GetLocation());
+
+            if (!ClassHasCorrectAttribute(classSymbol))
+                return new MaybeResult<ModelFailure, ClassModel>.None();
+
+            if (GetReadonlyFields(classSymbol) is not {Count: > 0} fields)
+                return new MaybeResult<ModelFailure, ClassModel>.None();
+
+            if (!ClassIsPartial(classDeclaration))
+                return new ModelFailure(
+                    ErrorId.MustBePartial,
+                    $"Class {classDeclaration.Identifier} must be partial", classDeclaration.GetLocation());
+
+            if (ClassHasExistingConstructors(classDeclaration))
+                return new ModelFailure(
+                    ErrorId.MustNotHaveConstructors,
+                    $"Class {classDeclaration.Identifier} must not define any constructors",
+                    classDeclaration.GetLocation());
+
+            return new ClassModel(classSymbol.Name, classDeclaration, fields);
         }
 
-        private Result<ModelFailure, ClassModel> Map(ClassDeclarationSyntax arg)
+        private IReadOnlyList<FieldModel> GetReadonlyFields(INamedTypeSymbol classSymbol) => classSymbol.GetMembers()
+            .OfType<IFieldSymbol>().Where(f => f.IsReadOnly).Select(f => new FieldModel(IdentifierName.Parse(f.Name), f.Type))
+            .ToList();
+
+        private bool ClassIsPartial(ClassDeclarationSyntax declaration)
         {
-            var model = _compilation.GetSemanticModel(arg.SyntaxTree);
-            
-            var classSymbol = model.GetDeclaredSymbol(arg);
-
-            CheckForPresenceOfCorrectAttribute();
-
-            CheckClassIsPartial();
-            
-            CheckThatAPublicConstructorIsNotAlreadyDeclared(classSymbol);
-
-            return new ClassModel();
+            return declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
         }
 
-        private static void CheckThatAPublicConstructorIsNotAlreadyDeclared(ISymbol? classSymbol)
+        private bool ClassHasCorrectAttribute(ISymbol classSymbol)
         {
-            var constructorSymbol = classSymbol.Constructors.FirstOrDefault(c => c.Parameters.Length == 0);
+            return classSymbol.GetAttributes().Any(_attributeDefinition.IsMatch);
+        }
+
+        private static bool ClassHasExistingConstructors(ClassDeclarationSyntax classSymbol)
+        {
+            return classSymbol.Members.OfType<ConstructorDeclarationSyntax>().Any();
         }
     }
 }

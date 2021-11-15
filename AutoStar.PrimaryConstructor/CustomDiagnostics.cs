@@ -18,7 +18,7 @@ namespace AutoStar.PrimaryConstructor
             _context.ReportDiagnostic(
                 Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "Cmdr0001",
+                        failure.ErrorId.ToString(),
                         "Failed to register method",
                         failure.Message,
                         "Cmdr",

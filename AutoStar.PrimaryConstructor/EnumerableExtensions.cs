@@ -27,6 +27,35 @@ namespace AutoStar.PrimaryConstructor
 
         public static (ImmutableArray<TSuccess> Successes, ImmutableArray<TError> Failures
             ) SeparateResults<TSuccess, TError>(
+                this IEnumerable<MaybeResult<TError, TSuccess>> source)
+        {
+            var successes = ImmutableArray.CreateBuilder<TSuccess>();
+            var failures = ImmutableArray.CreateBuilder<TError>();
+
+            foreach (var item in source)
+            {
+                switch (item)
+                {
+                    case MaybeResult<TError, TSuccess>.Ok(var success):
+                        successes.Add(success);
+
+                        break;
+
+                    case MaybeResult<TError, TSuccess>.Err(var failure):
+                        failures.Add(failure);
+
+                        break;
+
+                    case MaybeResult<TError, TSuccess>.None:
+                        break;
+                }
+            }
+
+            return (successes.ToImmutable(), failures.ToImmutable());
+        }
+
+        public static (ImmutableArray<TSuccess> Successes, ImmutableArray<TError> Failures
+            ) SeparateResults<TSuccess, TError>(
                 this IEnumerable<Result<TError, TSuccess>> source)
         {
             var successes = ImmutableArray.CreateBuilder<TSuccess>();

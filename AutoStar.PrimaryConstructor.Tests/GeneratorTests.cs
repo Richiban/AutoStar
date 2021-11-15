@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Reflection;
+﻿using System.Collections.Immutable;
 using System.Linq;
-using Shouldly;
-using System.Threading.Tasks;
+using System.Reflection;
 using AutoStar.PrimaryConstructor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
+using Shouldly;
 
-namespace Richiban.Cmdr.Tests
+namespace AutoStar.PimaryConstructor.Tests
 {
     [TestFixture]
     internal class GeneratorTests
     {
         [Test]
-        public void CmdrAttributeFileTest()
+        public void InjectedAttributeFileTest()
         {
             var source = @"
 [PrimaryConstructor]
@@ -27,18 +25,12 @@ public partial class TestClass
 
             var (outputCompilation, diagnostics) = RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            diagnostics.ShouldBeEmpty();
 
-            {
-                var fileNames = string.Join(
-                    ",\n",
-                    outputCompilation.SyntaxTrees.Select(s => s.FilePath));
+            var fileNames = outputCompilation.SyntaxTrees.Select(s => s.FilePath);
 
-                Assert.That(
-                    outputCompilation.SyntaxTrees.Count,
-                    Is.EqualTo(expected: 4),
-                    $"We expected four syntax trees: the original one plus the three we generated. Found: {fileNames}");
-            }
+            outputCompilation.SyntaxTrees.Count().ShouldBe(3,
+                $"We expected four syntax trees: the original one plus the two we generated. Found: {string.Join(",\n", fileNames)}");
 
             var cmdrAttributeFile = GetSourceFile(outputCompilation, "PrimaryConstructorAttribute.g.cs");
 
@@ -48,12 +40,8 @@ public partial class TestClass
                 @"using System;
 
 [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-public class PrimaryConstructorAttribute : Attribute
-{
-    public PrimaryConstructorAttribute()
-    {
-    }
-}");
+public sealed class PrimaryConstructorAttribute : Attribute
+{}");
         }
 
         [Test]
@@ -74,15 +62,36 @@ namespace TestSamples
 
             var (_, diagnostics) = RunGenerator(source);
 
-            Assert.That(diagnostics, Has.Length.EqualTo(expected: 1));
-            var diagnostic = diagnostics.Single();
-            Assert.That(diagnostic.Severity, Is.EqualTo(DiagnosticSeverity.Error));
-            Assert.That(diagnostic.Id, Is.EqualTo("Cmdr0001"));
+            var diagnostic = diagnostics.ShouldHaveSingleItem();
+            diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
+            diagnostic.Id.ShouldBe("ASPC0001");
 
-            Assert.That(
-                diagnostic.GetMessage(),
-                Is.EqualTo(
-                    "Method TestSamples.TestClass.TestMethod() must be static in order to use the Cmdr attribute."));
+            diagnostic.GetMessage().ShouldBe("Class TestClass must be partial");
+        }
+
+        [Test]
+        public void ClassWithExistingConstructorGivesDiagnosticError()
+        {
+            var source = @"
+using System;
+
+namespace TestSamples
+{
+    [PrimaryConstructor]
+    public partial class TestClass
+    {
+        public TestClass() {}
+    }
+}
+";
+
+            var (_, diagnostics) = RunGenerator(source);
+
+            var diagnostic = diagnostics.ShouldHaveSingleItem();
+            diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
+            diagnostic.Id.ShouldBe("ASPC0002");
+
+            diagnostic.GetMessage().ShouldBe("Class TestClass must not define any constructors");
         }
 
         [Test]
@@ -109,34 +118,14 @@ namespace TestSamples
 
             programText.ShouldBe(
                 @"using System;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using Richiban.Cmdr;
 
-public static class Program
+namespace TestSamples
 {
-    public static int Main(string[] args)
+    public partial class TestClass
     {
-        var testMethodCommand = new Command(""explicit"")
+        public TestClass(string data)
         {
-        };
-
-        testMethodCommand.Handler = CommandHandler.Create(TestSamples.TestClass.TestMethod);
-
-        var rootCommand = new RootCommand()
-        {
-            testMethodCommand
-        };
-
-        if (Repl.IsCall(args))
-        {
-            Repl.EnterNewLoop(rootCommand, ""Select a command"");
-
-            return 0;
-        }
-        else
-        {
-            return rootCommand.Invoke(args);
+            _data = data;
         }
     }
 }
@@ -145,7 +134,7 @@ public static class Program
 
         private static SyntaxTree GetSourceFile(Compilation outputCompilation, string fileName)
         {
-            return outputCompilation.SyntaxTrees.Single(s => s.FilePath == fileName);
+            return outputCompilation.SyntaxTrees.Single(s => s.FilePath.EndsWith(fileName));
         }
 
         private static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(
@@ -153,7 +142,7 @@ public static class Program
         {
             var inputCompilation = CSharpCompilation.Create(
                 "compilation",
-                new[] { CSharpSyntaxTree.ParseText(source) },
+                new[] {CSharpSyntaxTree.ParseText(source)},
                 new[]
                 {
                     MetadataReference.CreateFromFile(
