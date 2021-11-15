@@ -23,8 +23,7 @@ namespace Sample
                 {
                     FirstName = "Alex",
                     LastName = "Bloggs"
-                }
-                    .Build();
+                }.Build();
 
                 Console.WriteLine(myDataClass);
             }

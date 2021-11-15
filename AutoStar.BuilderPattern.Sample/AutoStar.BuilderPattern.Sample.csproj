@@ -1,27 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>Latest</LangVersion>
-		<Nullable>Enable</Nullable>
-    <CompilerGeneratedFilesOutputPath>$(MSBuildProjectDirectory)/generated</CompilerGeneratedFilesOutputPath>
-    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-    <AssemblyName>AutoStar.BuilderPattern.Sample</AssemblyName>
-    <RootNamespace>AutoStar.BuilderPattern.Sample</RootNamespace>
-	</PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>Latest</LangVersion>
+        <Nullable>Enable</Nullable>
+        <AssemblyName>AutoStar.BuilderPattern.Sample</AssemblyName>
+        <RootNamespace>AutoStar.BuilderPattern.Sample</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\AutoStar.BuilderPattern\AutoStar.BuilderPattern.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="../AutoStar.Common/AutoStar.Common.csproj" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="../AutoStar.Model/AutoStar.Model.csproj" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-
-  <Target Name="ExcludeGenerated" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
-      <Generated Include="generated/**/*.g.cs" />
-      <Compile Remove="@(Generated)" />
+        <ProjectReference Include="..\AutoStar.BuilderPattern\AutoStar.BuilderPattern.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     </ItemGroup>
-    <Delete Files="@(Generated)" />
-  </Target>
+
 </Project>

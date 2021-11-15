@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>Latest</LangVersion>
+    <RootNamespace>AutoStar.PrimaryConstructor</RootNamespace>
+    <AssemblyName>AutoStar.PrimaryConstructor</AssemblyName>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Richard Gibson (Richibansoft)</Authors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Description>Generate primary constructor from readonly fields</Description>
+    <Copyright>Copyright (c) Richard Gibson</Copyright>
+    <PackageProjectUrl>https://github.com/Richiban/CodeGen</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Richiban/CodeGen</RepositoryUrl>
+    <PackageTags>source-generator;auto-constructor</PackageTags>
+    <Version>0.0.1</Version>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.0.1">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
