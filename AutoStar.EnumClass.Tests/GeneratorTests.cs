@@ -26,7 +26,9 @@ public partial class TestClass
 
             diagnostics.ShouldBeEmpty();
 
-            var src = GetSourceFile(outputCompilation, "EnumClassAttribute.cs").GetText().ToString();
+            var src = GetSourceFile(outputCompilation, "EnumClassAttribute.cs")
+                .GetText()
+                .ToString();
 
             src.ShouldBe(
                 @"using System;
@@ -35,7 +37,7 @@ public partial class TestClass
 public sealed class EnumClassAttribute : Attribute
 {}");
         }
-        
+
         [Test]
         public void EnumClassWithNoInnerClassesResultsInNoGeneratedFile()
         {
@@ -51,8 +53,14 @@ public partial class TestClass
             diagnostics.ShouldBeEmpty();
 
             outputCompilation.SyntaxTrees.Count().ShouldBe(2);
-            
-            outputCompilation.SyntaxTrees.Select(s => s.FilePath).ShouldBe(new [] { "", @"AutoStar.EnumClass\AutoStar.EnumClass.EnumClassGenerator\EnumClassAttribute.cs" });
+
+            outputCompilation.SyntaxTrees.Select(s => s.FilePath)
+                .ShouldBe(
+                    new[]
+                    {
+                        "",
+                        @"AutoStar.EnumClass\AutoStar.EnumClass.EnumClassGenerator\EnumClassAttribute.cs"
+                    });
         }
 
         [Test]
@@ -79,7 +87,9 @@ namespace TestSamples
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
             diagnostic.Id.ShouldBe("ASEC0001");
 
-            diagnostic.GetMessage().ShouldBe("The class TestClass must be partial in order to use the EnumClass attribute");
+            diagnostic.GetMessage()
+                .ShouldBe(
+                    "The class TestClass must be partial in order to use the EnumClass attribute");
         }
 
         [Test]
@@ -108,15 +118,15 @@ namespace TestSamples
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
             diagnostic.Id.ShouldBe("ASEC0002");
 
-            diagnostic.GetMessage().ShouldBe("The class TestClass must not define any constructors in order to use the EnumClass attribute");
+            diagnostic.GetMessage()
+                .ShouldBe(
+                    "The class TestClass must not define any constructors in order to use the EnumClass attribute");
         }
 
         [Test]
-        public void DummyTest()
+        public void BasicScenario()
         {
             var source = @"
-using System;
-
 namespace TestSamples
 {
     [EnumClass]
@@ -132,14 +142,14 @@ namespace TestSamples
 
             Assert.That(diagnostics, Is.Empty);
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs").GetText().ToString();
+            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+                .GetText()
+                .ToString();
 
             programText.ShouldBe(
-                @"using System;
-
-namespace TestSamples
+                @"namespace TestSamples
 {
-    public partial abstract class TestClass
+    public abstract partial class TestClass
     {
         private TestClass()
         {
@@ -153,13 +163,80 @@ namespace TestSamples
         {
         }
     }
-}
-");
+}");
         }
 
-        private static SyntaxTree GetSourceFile(Compilation outputCompilation, string fileName)
+        [Test]
+        public void NestedScenario()
         {
-            return outputCompilation.SyntaxTrees.Single(s => s.FilePath.EndsWith(fileName));
+            var source = @"
+namespace TestSamples
+{
+    [EnumClass]
+    public partial class TestClass
+    {
+        partial class TypeA {}
+        partial class TypeB {}
+
+        [EnumClass]
+        partial class TypeC
+        {
+            partial class TypeD {}
+            partial class TypeE {}
+        }
+    }
+}
+";
+
+            var (compilation, diagnostics) = RunGenerator(source);
+
+            Assert.That(diagnostics, Is.Empty);
+
+            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+                .GetText()
+                .ToString();
+
+            programText.ShouldBe(
+                @"namespace TestSamples
+{
+    public abstract partial class TestClass
+    {
+        private TestClass()
+        {
+        }
+
+        public sealed partial class TypeA : TestClass
+        {
+        }
+
+        public sealed partial class TypeB : TestClass
+        {
+        }
+
+        public abstract partial class TypeC : TestClass
+        {
+            private TypeC()
+            {
+            }
+
+            public sealed partial class TypeD : TypeC
+            {
+            }
+
+            public sealed partial class TypeE : TypeC
+            {
+            }
+        }
+    }
+}");
+        }
+
+        private static SyntaxTree GetSourceFile(
+            Compilation outputCompilation,
+            string fileName)
+        {
+            return outputCompilation.SyntaxTrees.Single(
+                s => s.FilePath.EndsWith(fileName));
         }
 
         private static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(
@@ -167,7 +244,7 @@ namespace TestSamples
         {
             var inputCompilation = CSharpCompilation.Create(
                 "compilation",
-                new[] {CSharpSyntaxTree.ParseText(source)},
+                new[] { CSharpSyntaxTree.ParseText(source) },
                 new[]
                 {
                     MetadataReference.CreateFromFile(

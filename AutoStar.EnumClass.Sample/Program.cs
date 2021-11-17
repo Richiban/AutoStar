@@ -8,12 +8,12 @@ namespace Sample
         {
             Console.WriteLine("==== Enum-class Validation ====");
 
-            Service service = new Service.TypeA();
+            AutoStar.EnumClass.Sample.Service service = new AutoStar.EnumClass.Sample.Service.TypeA();
 
             switch (service)
             {
-                case Service.TypeA a: Console.WriteLine("We have an A"); break;
-                case Service.TypeB b: Console.WriteLine("We have a B"); break;
+                case AutoStar.EnumClass.Sample.Service.TypeA a: Console.WriteLine("We have an A"); break;
+                case AutoStar.EnumClass.Sample.Service.TypeB b: Console.WriteLine("We have a B"); break;
                 
                 default: Console.WriteLine("We have an unknown service"); break;
             }

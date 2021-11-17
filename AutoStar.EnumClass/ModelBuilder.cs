@@ -63,7 +63,7 @@ namespace AutoStar.EnumClass
 
         private IReadOnlyList<ClassDeclarationSyntax> GetInnerClasses(
             ClassDeclarationSyntax classSymbol) =>
-            classSymbol.DescendantNodes().OfType<ClassDeclarationSyntax>().ToList();
+            classSymbol.ChildNodes().OfType<ClassDeclarationSyntax>().ToList();
 
         private bool ClassIsPartial(ClassDeclarationSyntax declaration)
         {
