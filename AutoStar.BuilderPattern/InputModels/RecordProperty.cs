@@ -4,7 +4,11 @@ namespace AutoStar.BuilderPattern.InputModels
 {
     public class RecordProperty
     {
-        public RecordProperty(string name, string type, bool isOptional = false, string? defaultValue = null)
+        public RecordProperty(
+            string name,
+            string type,
+            bool isOptional = false,
+            string? defaultValue = null)
         {
             Name = name;
             Type = type;

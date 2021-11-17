@@ -17,12 +17,12 @@ namespace Sample
         static void Main(string[] args)
         {
             Console.WriteLine("==== Builder Validation ====");
+
             try
             {
                 var myDataClass = new Person.Builder
                 {
-                    FirstName = "Alex",
-                    LastName = "Bloggs"
+                    FirstName = "Alex", LastName = "Bloggs"
                 }.Build();
 
                 Console.WriteLine(myDataClass);
@@ -34,4 +34,3 @@ namespace Sample
         }
     }
 }
-

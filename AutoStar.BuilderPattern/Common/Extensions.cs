@@ -7,7 +7,9 @@ namespace AutoStar.BuilderPattern.Common
 {
     public static class Extensions
     {
-        public static bool HasAttribute(this SyntaxList<AttributeListSyntax> attributes, string name)
+        public static bool HasAttribute(
+            this SyntaxList<AttributeListSyntax> attributes,
+            string name)
         {
             string fullname, shortname;
             var attrLen = "Attribute".Length;
@@ -23,15 +25,20 @@ namespace AutoStar.BuilderPattern.Common
                 shortname = name;
             }
 
-            return attributes.Any(al => al.Attributes.Any(a => a.Name.ToString() == shortname || a.Name.ToString() == fullname));
+            return attributes.Any(
+                al => al.Attributes.Any(
+                    a => a.Name.ToString() == shortname ||
+                         a.Name.ToString() == fullname));
         }
 
         public static T? FindParent<T>(this SyntaxNode node) where T : class
         {
             var current = node;
+
             while (true)
             {
                 current = current.Parent;
+
                 if (current == null || current is T)
                     return current as T;
             }

@@ -5,7 +5,9 @@ namespace AutoStar.BuilderPattern.InputModels
 {
     public class RecordDeclaration
     {
-        public RecordDeclaration(string name, IReadOnlyCollection<RecordProperty> recordProperties)
+        public RecordDeclaration(
+            string name,
+            IReadOnlyCollection<RecordProperty> recordProperties)
         {
             Name = name;
             RecordProperties = recordProperties;

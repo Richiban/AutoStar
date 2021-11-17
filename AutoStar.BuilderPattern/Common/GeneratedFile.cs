@@ -20,17 +20,24 @@ namespace AutoStar.BuilderPattern.Common
 
         public Compilation AddTo(GeneratorExecutionContext context)
         {
-            var options = ((CSharpCompilation)context.Compilation).SyntaxTrees[0].Options as CSharpParseOptions;
+            var options =
+                ((CSharpCompilation)context.Compilation).SyntaxTrees[0].Options as
+                CSharpParseOptions;
+
             var typeName = TypeFile.TypeDeclaration.Name;
 
             var codeBuilder = new CodeBuilder();
 
             TypeFile.WriteTo(codeBuilder);
 
-            context.AddSource($"{typeName}.{GeneratorName}.g.cs",
+            context.AddSource(
+                $"{typeName}.{GeneratorName}.g.cs",
                 SourceText.From(codeBuilder.ToString(), Encoding.UTF8));
 
-            return context.Compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(codeBuilder.ToString(), Encoding.UTF8), options));
+            return context.Compilation.AddSyntaxTrees(
+                CSharpSyntaxTree.ParseText(
+                    SourceText.From(codeBuilder.ToString(), Encoding.UTF8),
+                    options));
         }
     }
 }

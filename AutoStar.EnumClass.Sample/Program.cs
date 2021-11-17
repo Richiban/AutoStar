@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sample
+namespace AutoStar.EnumClass.Sample
 {
     class Program
     {
@@ -8,12 +8,12 @@ namespace Sample
         {
             Console.WriteLine("==== Enum-class Validation ====");
 
-            AutoStar.EnumClass.Sample.Service service = new AutoStar.EnumClass.Sample.Service.TypeA();
+            Service service = new Service.TypeA();
 
             switch (service)
             {
-                case AutoStar.EnumClass.Sample.Service.TypeA a: Console.WriteLine("We have an A"); break;
-                case AutoStar.EnumClass.Sample.Service.TypeB b: Console.WriteLine("We have a B"); break;
+                case Service.TypeA a: Console.WriteLine("We have an A"); break;
+                case Service.TypeB b: Console.WriteLine("We have a B"); break;
                 
                 default: Console.WriteLine("We have an unknown service"); break;
             }

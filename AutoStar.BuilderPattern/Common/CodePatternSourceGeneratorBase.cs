@@ -15,27 +15,36 @@ namespace AutoStar.BuilderPattern.Common
         {
             var compilation = InjectAttribute(context);
 
-            var attributeSymbol = compilation.GetTypeByMetadataName(AttributeToInject.TypeDeclaration.Name)!;
+            var attributeSymbol =
+                compilation.GetTypeByMetadataName(
+                    AttributeToInject.TypeDeclaration.Name)!;
 
             foreach (var syntaxTree in context.Compilation.SyntaxTrees)
             {
                 var root = syntaxTree.GetRoot();
                 var usings = (root as CompilationUnitSyntax)!.Usings.ToString();
 
-                foreach (var classDeclaration in GetCandidateClasses(root, context.Compilation, attributeSymbol))
+                foreach (var classDeclaration in GetCandidateClasses(
+                    root,
+                    context.Compilation,
+                    attributeSymbol))
                 {
-                    var namespaceName = classDeclaration.ContainingNamespace.ToDisplayString();
+                    var namespaceName =
+                        classDeclaration.ContainingNamespace.ToDisplayString();
 
-                    GeneratePatternFor(classDeclaration, usings, namespaceName).AddTo(context);
+                    GeneratePatternFor(classDeclaration, usings, namespaceName)
+                        .AddTo(context);
                 }
             }
         }
 
-        private IEnumerable<INamedTypeSymbol> GetCandidateClasses(SyntaxNode root, Compilation compilation, INamedTypeSymbol attributeSymbol)
+        private IEnumerable<INamedTypeSymbol> GetCandidateClasses(
+            SyntaxNode root,
+            Compilation compilation,
+            INamedTypeSymbol attributeSymbol)
         {
-            var candidateClasses =  root.DescendantNodes()
-                .OfType<ClassDeclarationSyntax>()
-                ;
+            var candidateClasses = root.DescendantNodes()
+                .OfType<ClassDeclarationSyntax>();
 
             foreach (var @class in candidateClasses)
             {
@@ -43,7 +52,10 @@ namespace AutoStar.BuilderPattern.Common
                 var classSymbol = model.GetDeclaredSymbol(@class) as INamedTypeSymbol;
 
                 //if (classSymbol.GetAttributes().Any(ad => ad.AttributeClass.Equals(attributeSymbol, SymbolEqualityComparer.Default)))
-                if (classSymbol.GetAttributes().Any(ad => ad.AttributeClass.MetadataName.Equals(attributeSymbol.MetadataName)))
+                if (classSymbol.GetAttributes()
+                    .Any(
+                        ad => ad.AttributeClass.MetadataName.Equals(
+                            attributeSymbol.MetadataName)))
                 {
                     yield return classSymbol;
                 }
@@ -66,12 +78,17 @@ namespace AutoStar.BuilderPattern.Common
         }
 
         public virtual TypeFile AttributeToInject =>
-            new TypeFile("using System;\r\n",
+            new TypeFile(
+                "using System;\r\n",
                 new ClassDeclaration(GeneratorName + "Attribute")
                 {
                     Attribute = new AttributeA("AttributeUsage")
                     {
-                        Arguments = new[] { "AttributeTargets.Class", "Inherited = true", "AllowMultiple = false" }
+                        Arguments = new[]
+                        {
+                            "AttributeTargets.Class", "Inherited = true",
+                            "AllowMultiple = false"
+                        }
                     },
                     BaseClass = "Attribute"
                 })
@@ -79,6 +96,9 @@ namespace AutoStar.BuilderPattern.Common
                 //NamespaceName = nameof(AutoStar)
             };
 
-        public abstract GeneratedFile GeneratePatternFor(INamedTypeSymbol classSymbol, string usings, string @namespace);
+        public abstract GeneratedFile GeneratePatternFor(
+            INamedTypeSymbol classSymbol,
+            string usings,
+            string @namespace);
     }
 }
