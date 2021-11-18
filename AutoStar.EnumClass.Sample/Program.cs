@@ -2,9 +2,9 @@
 
 namespace AutoStar.EnumClass.Sample
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WriteLine("==== Enum-class Validation ====");
 
@@ -12,12 +12,20 @@ namespace AutoStar.EnumClass.Sample
 
             switch (service)
             {
-                case Service.TypeA a: Console.WriteLine("We have an A"); break;
-                case Service.TypeB b: Console.WriteLine("We have a B"); break;
-                
-                default: Console.WriteLine("We have an unknown service"); break;
+                case Service.TypeA a:
+                    Console.WriteLine("We have an A");
+
+                    break;
+                case Service.TypeB b:
+                    Console.WriteLine("We have a B");
+
+                    break;
+
+                default:
+                    Console.WriteLine("We have an unknown service");
+
+                    break;
             }
         }
     }
 }
-

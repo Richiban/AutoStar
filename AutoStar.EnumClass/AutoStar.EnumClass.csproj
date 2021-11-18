@@ -33,7 +33,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\AutoStar.Common\AutoStar.Common.csproj">
-            <PrivateAssets>all</PrivateAssets>
         </ProjectReference>
     </ItemGroup>
 </Project>

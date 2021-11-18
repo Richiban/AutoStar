@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
@@ -93,6 +92,74 @@ namespace TestSamples
     {
         public class Builder
         {
+        }
+    }
+}");
+        }
+
+        [Test]
+        public void SimpleCase()
+        {
+            var source = @"
+namespace TestSamples
+{
+    [BuilderPattern]
+    public partial class TestClass
+    {
+        public string A { get; }
+        public string B { get; }
+        public int    C { get; }
+    }
+}
+";
+
+            var (compilation, diagnostics) = RunGenerator(source);
+
+            Assert.That(diagnostics, Is.Empty);
+
+            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+                .GetText()
+                .ToString();
+
+            programText.ShouldBe(
+                @"namespace TestSamples
+{
+    public partial class TestClass
+    {
+        public class Builder
+        {
+            public string A { get; }
+            public string B { get; }
+            public int    C { get; }
+
+            public TestClass Build()
+            {
+                var validationErrors = new List<string>();
+
+                if (A == null)
+                {
+                    validationErrors.Add(""A is required"");
+                }
+
+                if (B == null)
+                {
+                    validationErrors.Add(""B is required"");
+                }
+
+                if (validationErrors.Any())
+                {
+                    throw new BuilderException(string.Join(Environment.NewLine, validationErrors));
+                }
+
+                return new TestClass(A, B, C);
+            }
+        }
+
+        public class BuilderException : Exception
+        {
+            public BuilderException(string message) : base(message)
+            {
+            }
         }
     }
 }");

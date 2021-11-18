@@ -70,8 +70,7 @@ public abstract class TestClass
 
             var actual = equatableEqualsMethod.NormalizeWhitespace().ToFullString();
 
-            var expected =
-                @"public bool Equals(TestClass other)
+            var expected = @"public bool Equals(TestClass other)
 {
     return other != null && this.TestAutoProperty.Equals(other.TestAutoProperty) && this.TestField.Equals(other.TestField);
 }";

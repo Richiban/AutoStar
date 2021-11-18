@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoStar.Common;
@@ -10,54 +11,64 @@ namespace AutoStar.EnumClass
 {
     internal class Scanner
     {
-        private readonly EnumClassAttributeDefinition _attributeDefinition;
+        private readonly MarkerAttribute _attribute;
         private readonly Compilation _compilation;
 
         public Scanner(
-            EnumClassAttributeDefinition attributeDefinition,
+            MarkerAttribute attribute,
             Compilation compilation)
         {
-            _attributeDefinition = attributeDefinition;
+            _attribute = attribute;
             _compilation = compilation;
         }
 
-        public ImmutableArray<ResultOption<ModelFailure, EnumClassModel>> BuildFrom(
+        public ImmutableArray<ResultOption<ModelFailure, EnumClassModel>> BuildFor(
             IEnumerable<ClassDeclarationSyntax> candidateClasses) =>
-            candidateClasses.Select(Map).ToImmutableArray();
+            candidateClasses.Select(BuildFor).ToImmutableArray();
 
-        private ResultOption<ModelFailure, EnumClassModel> Map(
+        private ResultOption<ModelFailure, EnumClassModel> BuildFor(
             ClassDeclarationSyntax classDeclaration)
         {
             var model = _compilation.GetSemanticModel(classDeclaration.SyntaxTree);
 
             if (ModelExtensions.GetDeclaredSymbol(model, classDeclaration) is not
                 INamedTypeSymbol classSymbol)
+            {
                 return new ModelFailure(
                     ErrorId.Unknown,
                     ErrorMessages.Unknown,
                     classDeclaration.GetLocation());
+            }
 
             if (!ClassHasCorrectAttribute(classSymbol))
+            {
                 return new ResultOption<ModelFailure, EnumClassModel>.None();
+            }
 
             if (GetInnerClasses(classDeclaration) is not { Count: > 0 } innerClasses)
+            {
                 return new ResultOption<ModelFailure, EnumClassModel>.None();
+            }
 
             if (!ClassIsPartial(classDeclaration))
+            {
                 return new ModelFailure(
                     ErrorId.MustBePartial,
                     ErrorMessages.MustBePartial(
                         classDeclaration.Identifier.ToString(),
-                        _attributeDefinition.ShortName),
+                        _attribute.ShortName),
                     classDeclaration.GetLocation());
+            }
 
             if (ClassHasExistingConstructors(classDeclaration))
+            {
                 return new ModelFailure(
                     ErrorId.MustNotHaveConstructors,
                     ErrorMessages.MustNotHaveConstructors(
                         classDeclaration.Identifier.ToString(),
-                        _attributeDefinition.ShortName),
+                        _attribute.ShortName),
                     classDeclaration.GetLocation());
+            }
 
             return new EnumClassModel(classSymbol.Name, classDeclaration, innerClasses);
         }
@@ -66,20 +77,14 @@ namespace AutoStar.EnumClass
             ClassDeclarationSyntax classSymbol) =>
             classSymbol.ChildNodes().OfType<ClassDeclarationSyntax>().ToList();
 
-        private bool ClassIsPartial(ClassDeclarationSyntax declaration)
-        {
-            return declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
-        }
+        private bool ClassIsPartial(ClassDeclarationSyntax declaration) =>
+            declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
 
-        private bool ClassHasCorrectAttribute(ISymbol classSymbol)
-        {
-            return classSymbol.GetAttributes().Any(_attributeDefinition.IsMatch);
-        }
+        private bool ClassHasCorrectAttribute(ISymbol classSymbol) =>
+            classSymbol.GetAttributes().Any(_attribute.IsMatch);
 
         private static bool ClassHasExistingConstructors(
-            ClassDeclarationSyntax classSymbol)
-        {
-            return classSymbol.Members.OfType<ConstructorDeclarationSyntax>().Any();
-        }
+            ClassDeclarationSyntax classSymbol) =>
+            classSymbol.Members.OfType<ConstructorDeclarationSyntax>().Any();
     }
 }

@@ -22,41 +22,35 @@ namespace AutoStar.Common
                     classDeclaration.Identifier));
         }
 
-        private static MethodDeclarationSyntax GenerateObjectEqualsMethod()
-        {
-            return
-                MethodDeclaration(
-                        PredefinedType(Token(SyntaxKind.BoolKeyword)),
-                        Identifier("Equals"))
-                    .WithModifiers(
-                        TokenList(
-                            Token(SyntaxKind.PublicKeyword),
-                            Token(SyntaxKind.OverrideKeyword)))
-                    .WithParameterList(
-                        ParameterList(
-                            SingletonSeparatedList(
-                                Parameter(Identifier("other"))
-                                    .WithType(
-                                        PredefinedType(
-                                            Token(SyntaxKind.ObjectKeyword))))))
-                    .WithExpressionBody(
-                        ArrowExpressionClause(
-                            BinaryExpression(
-                                SyntaxKind.LogicalAndExpression,
-                                IsPatternExpression(
-                                    IdentifierName("other"),
-                                    DeclarationPattern(
-                                        IdentifierName("TestClass"),
-                                        SingleVariableDesignation(
-                                            Identifier("otherClass")))),
-                                InvocationExpression(IdentifierName("Equals"))
-                                    .WithArgumentList(
-                                        ArgumentList(
-                                            SingletonSeparatedList(
-                                                Argument(
-                                                    IdentifierName("otherClass"))))))))
-                    .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
-        }
+        private static MethodDeclarationSyntax GenerateObjectEqualsMethod() =>
+            MethodDeclaration(
+                    PredefinedType(Token(SyntaxKind.BoolKeyword)),
+                    Identifier("Equals"))
+                .WithModifiers(
+                    TokenList(
+                        Token(SyntaxKind.PublicKeyword),
+                        Token(SyntaxKind.OverrideKeyword)))
+                .WithParameterList(
+                    ParameterList(
+                        SingletonSeparatedList(
+                            Parameter(Identifier("other"))
+                                .WithType(
+                                    PredefinedType(Token(SyntaxKind.ObjectKeyword))))))
+                .WithExpressionBody(
+                    ArrowExpressionClause(
+                        BinaryExpression(
+                            SyntaxKind.LogicalAndExpression,
+                            IsPatternExpression(
+                                IdentifierName("other"),
+                                DeclarationPattern(
+                                    IdentifierName("TestClass"),
+                                    SingleVariableDesignation(Identifier("otherClass")))),
+                            InvocationExpression(IdentifierName("Equals"))
+                                .WithArgumentList(
+                                    ArgumentList(
+                                        SingletonSeparatedList(
+                                            Argument(IdentifierName("otherClass"))))))))
+                .WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
 
         private static MethodDeclarationSyntax GenerateEqualsMethodForMembers(
             IEnumerable<MemberDeclarationSyntax> members,

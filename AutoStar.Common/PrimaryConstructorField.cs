@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.Common
 {
     public class PrimaryConstructorField
     {
+        private readonly Lazy<string> _parameterName;
+
         public PrimaryConstructorField(string fieldName, string typeName) : this(
             fieldName,
             typeName,
@@ -31,10 +32,14 @@ namespace AutoStar.Common
         public string FieldName { get; }
         public string TypeName { get; }
 
+        public string ParameterName => _parameterName.Value;
+
         private static string[] SplitName(string original)
         {
-            if (String.IsNullOrEmpty(original))
+            if (string.IsNullOrEmpty(original))
+            {
                 return Array.Empty<string>();
+            }
 
             var words = new List<string>();
 
@@ -63,10 +68,6 @@ namespace AutoStar.Common
             return words.ToArray();
         }
 
-        private readonly Lazy<string> _parameterName;
-
-        public string ParameterName => _parameterName.Value;
-
         private static string ToCamelCase(IEnumerable<string> parts)
         {
             var sb = new StringBuilder();
@@ -79,8 +80,8 @@ namespace AutoStar.Common
                 }
                 else
                 {
-                    sb.Append(char.ToUpper(part[0]));
-                    sb.Append(part.Substring(1));
+                    sb.Append(char.ToUpper(part[index: 0]));
+                    sb.Append(part.Substring(startIndex: 1));
                 }
             }
 

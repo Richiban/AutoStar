@@ -86,15 +86,13 @@ namespace AutoStar.EnumClass
 
         private static ClassDeclarationSyntax ConvertInnerClass(
             ClassDeclarationSyntax innerClassDeclaration,
-            SyntaxToken outerClassIdentifier)
-        {
-            return IsEnumClass(innerClassDeclaration)
+            SyntaxToken outerClassIdentifier) =>
+            IsEnumClass(innerClassDeclaration)
                 ? ConvertEnumClass(
                     innerClassDeclaration,
                     outerClassIdentifier,
                     makePublic: true)
                 : ConvertCaseClass(innerClassDeclaration, outerClassIdentifier);
-        }
 
         private static bool IsEnumClass(ClassDeclarationSyntax innerClassDeclaration)
         {

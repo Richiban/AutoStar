@@ -15,14 +15,14 @@ namespace AutoStar.Common
             FileName = GetFileName(compilationUnit);
         }
 
+        public string GetCode() => _compilationUnit.NormalizeWhitespace().ToFullString();
+
+        public string FileName { get; }
+
         private static string GetFileName(CompilationUnitSyntax compilationUnit) =>
             compilationUnit.DescendantNodes()
                 .OfType<ClassDeclarationSyntax>()
                 .Single()
                 .Identifier + ".g.cs";
-
-        public string GetCode() => _compilationUnit.NormalizeWhitespace().ToFullString();
-
-        public string FileName { get; }
     }
 }

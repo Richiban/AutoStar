@@ -1,6 +1,7 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
+﻿using System;
+using System.Collections.Immutable;
 using System.Reflection;
+using System.Linq;
 using AutoStar.PrimaryConstructor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -29,10 +30,14 @@ public partial class TestClass
 
             var fileNames = outputCompilation.SyntaxTrees.Select(s => s.FilePath);
 
-            outputCompilation.SyntaxTrees.Count().ShouldBe(3,
-                $"We expected four syntax trees: the original one plus the two we generated. Found: {string.Join(",\n", fileNames)}");
+            outputCompilation.SyntaxTrees.Count()
+                .ShouldBe(
+                    expected: 3,
+                    $"We expected three syntax trees: the original one plus the two we generated. Found: {string.Join(",\n", fileNames)}");
 
-            var cmdrAttributeFile = GetSourceFile(outputCompilation, "PrimaryConstructorAttribute.g.cs");
+            var cmdrAttributeFile = GetSourceFile(
+                outputCompilation,
+                "PrimaryConstructorAttribute.g.cs");
 
             var src = cmdrAttributeFile.GetText().ToString();
 
@@ -91,7 +96,8 @@ namespace TestSamples
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
             diagnostic.Id.ShouldBe("ASPC0002");
 
-            diagnostic.GetMessage().ShouldBe("Class TestClass must not define any constructors");
+            diagnostic.GetMessage()
+                .ShouldBe("Class TestClass must not define any constructors");
         }
 
         [Test]
@@ -114,7 +120,9 @@ namespace TestSamples
 
             Assert.That(diagnostics, Is.Empty);
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs").GetText().ToString();
+            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+                .GetText()
+                .ToString();
 
             programText.ShouldBe(
                 @"using System;
@@ -131,9 +139,12 @@ namespace TestSamples
 }");
         }
 
-        private static SyntaxTree GetSourceFile(Compilation outputCompilation, string fileName)
+        private static SyntaxTree GetSourceFile(
+            Compilation outputCompilation,
+            string fileName)
         {
-            return outputCompilation.SyntaxTrees.Single(s => s.FilePath.EndsWith(fileName));
+            return outputCompilation.SyntaxTrees.Single(
+                s => s.FilePath.EndsWith(fileName));
         }
 
         private static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(
@@ -141,7 +152,7 @@ namespace TestSamples
         {
             var inputCompilation = CSharpCompilation.Create(
                 "compilation",
-                new[] {CSharpSyntaxTree.ParseText(source)},
+                new[] { CSharpSyntaxTree.ParseText(source) },
                 new[]
                 {
                     MetadataReference.CreateFromFile(

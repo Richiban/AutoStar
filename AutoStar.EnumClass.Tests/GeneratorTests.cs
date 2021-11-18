@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
@@ -52,7 +52,7 @@ public partial class TestClass
 
             diagnostics.ShouldBeEmpty();
 
-            outputCompilation.SyntaxTrees.Count().ShouldBe(2);
+            outputCompilation.SyntaxTrees.Count().ShouldBe(expected: 2);
 
             outputCompilation.SyntaxTrees.Select(s => s.FilePath)
                 .ShouldBe(
@@ -252,7 +252,7 @@ namespace TestSamples
                 },
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
 
-            var generator = new EnumClassGenerator();
+            var generator = new EnumClassSourceGenerator();
 
             var driver = CSharpGeneratorDriver.Create(generator)
                 .RunGeneratorsAndUpdateCompilation(

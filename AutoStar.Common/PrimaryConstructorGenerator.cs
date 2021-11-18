@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -20,7 +19,7 @@ namespace AutoStar.Common
             {
                 return null;
             }
-            
+
             var classDeclarationIdentifier = classDeclaration.Identifier;
 
             return GetNewConstructor(classDeclarationIdentifier, fields);
@@ -29,8 +28,7 @@ namespace AutoStar.Common
         private static ConstructorDeclarationSyntax GetNewConstructor(
             SyntaxToken classIdentifier,
             ImmutableArray<PrimaryConstructorField> fields) =>
-            SyntaxFactory
-                .ConstructorDeclaration(classIdentifier)
+            SyntaxFactory.ConstructorDeclaration(classIdentifier)
                 .WithBody(GetConstructorBody(fields))
                 .WithParameterList(GetParameterList(fields))
                 .WithModifiers(
@@ -48,11 +46,8 @@ namespace AutoStar.Common
         }
 
         private static BlockSyntax GetConstructorBody(
-            IEnumerable<PrimaryConstructorField> fields)
-        {
-            return SyntaxFactory.Block(
-                SyntaxFactory.List(fields.Select(GetFieldAssignment)));
-        }
+            IEnumerable<PrimaryConstructorField> fields) =>
+            SyntaxFactory.Block(SyntaxFactory.List(fields.Select(GetFieldAssignment)));
 
         private static ParameterListSyntax GetParameterList(
             IEnumerable<PrimaryConstructorField> fields) =>

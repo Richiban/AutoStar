@@ -1,29 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using AutoStar.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Win32.SafeHandles;
 
 namespace AutoStar.PrimaryConstructor
 {
     internal class Scanner
     {
-        private readonly MarkerAttributeDefinition _attributeDefinition;
+        private readonly MarkerAttribute _attribute;
         private readonly Compilation _compilation;
 
         public Scanner(
-            MarkerAttributeDefinition attributeDefinition,
+            MarkerAttribute attribute,
             Compilation compilation)
         {
-            _attributeDefinition = attributeDefinition;
+            _attribute = attribute;
             _compilation = compilation;
         }
 
-        public ImmutableArray<ResultOption<ScanFailure, CompilationUnitSyntax>>
-            BuildFrom(IEnumerable<ClassDeclarationSyntax> candidateClasses) =>
+        public ImmutableArray<ResultOption<ScanFailure, CompilationUnitSyntax>> BuildFrom(
+            IEnumerable<ClassDeclarationSyntax> candidateClasses) =>
             candidateClasses.Select(Map).ToImmutableArray();
 
         private ResultOption<ScanFailure, CompilationUnitSyntax> Map(
@@ -36,28 +36,36 @@ namespace AutoStar.PrimaryConstructor
                     INamedTypeSymbol;
 
             if (classSymbol is null)
+            {
                 return new ScanFailure(
                     ErrorId.Unknown,
                     $"Unknown problem with class {classDeclaration.Identifier}",
                     classDeclaration.GetLocation());
+            }
 
             if (!ClassHasCorrectAttribute(classSymbol))
+            {
                 return new None();
+            }
 
             if (!ClassIsPartial(classDeclaration))
+            {
                 return new ScanFailure(
                     ErrorId.MustBePartial,
                     $"Class {classDeclaration.Identifier} must be partial",
                     classDeclaration.GetLocation());
+            }
 
             if (ClassHasExistingConstructors(classDeclaration))
+            {
                 return new ScanFailure(
                     ErrorId.MustNotHaveConstructors,
                     $"Class {classDeclaration.Identifier} must not define any constructors",
                     classDeclaration.GetLocation());
+            }
 
             var newConstructor =
-                Common.PrimaryConstructorGenerator.GetNewConstructor(classDeclaration);
+                PrimaryConstructorGenerator.GetNewConstructor(classDeclaration);
 
             return newConstructor.Select(
                 c => GeneratePartialComplement(classDeclaration, c));
@@ -92,29 +100,20 @@ namespace AutoStar.PrimaryConstructor
                     .WithMembers(SyntaxFactory.List<MemberDeclarationSyntax>())
                     .AddMembers(newNamespace);
             }
-            else
-            {
-                return originalRoot
-                    .WithMembers(SyntaxFactory.List<MemberDeclarationSyntax>())
-                    .AddMembers(newClass);
-            }
+
+            return originalRoot.WithMembers(SyntaxFactory.List<MemberDeclarationSyntax>())
+                .AddMembers(newClass);
         }
 
-        private bool ClassIsPartial(ClassDeclarationSyntax declaration)
-        {
-            return declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
-        }
+        private bool ClassIsPartial(ClassDeclarationSyntax declaration) =>
+            declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
 
-        private bool ClassHasCorrectAttribute(ISymbol classSymbol)
-        {
-            return classSymbol.GetAttributes().Any(_attributeDefinition.IsMatch);
-        }
+        private bool ClassHasCorrectAttribute(ISymbol classSymbol) =>
+            classSymbol.GetAttributes().Any(_attribute.IsMatch);
 
         private static bool ClassHasExistingConstructors(
-            ClassDeclarationSyntax classSymbol)
-        {
-            return classSymbol.Members.OfType<ConstructorDeclarationSyntax>().Any();
-        }
+            ClassDeclarationSyntax classSymbol) =>
+            classSymbol.Members.OfType<ConstructorDeclarationSyntax>().Any();
 
         private static string ToFullString(SyntaxNode newClassSyntax) =>
             newClassSyntax.SyntaxTree.GetRoot().NormalizeWhitespace().ToFullString();

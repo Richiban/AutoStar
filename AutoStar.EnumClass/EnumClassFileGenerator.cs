@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.EnumClass
 {
-    class EnumClassFileGenerator : ICodeFileGenerator
+    internal class EnumClassFileGenerator : ICodeFileGenerator
     {
         private readonly EnumClassModel _model;
 

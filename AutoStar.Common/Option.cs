@@ -1,5 +1,4 @@
 using System;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.Common
 {

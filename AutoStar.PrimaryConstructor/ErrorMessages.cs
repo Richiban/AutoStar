@@ -1,17 +1,15 @@
-﻿namespace AutoStar.PrimaryConstructor
+﻿using System;
+
+namespace AutoStar.PrimaryConstructor
 {
-    static class ErrorMessages
+    internal static class ErrorMessages
     {
         public static string Unknown => "There was an unknown error";
 
-        public static string MustBePartial(string typeName)
-        {
-            return $"{typeName} must be partial";
-        }
+        public static string MustBePartial(string typeName) =>
+            $"{typeName} must be partial";
 
-        public static string MustNotHaveConstructors(string typeName)
-        {
-            return $"{typeName} must not have constructors";
-        }
+        public static string MustNotHaveConstructors(string typeName) =>
+            $"{typeName} must not have constructors";
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using AutoStar.Common;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -10,24 +10,16 @@ namespace AutoStar.PrimaryConstructor
     [Generator]
     public class PrimaryConstructorSourceGenerator : ISourceGenerator
     {
-        private MarkerAttributeDefinition _attributeDefinition = null!;
+        private MarkerAttribute _attribute = null!;
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            _attributeDefinition = new MarkerAttributeDefinition("PrimaryConstructor");
+            _attribute = new MarkerAttribute("PrimaryConstructor");
 
             context.RegisterForPostInitialization(InjectStaticSourceFiles);
 
             context.RegisterForSyntaxNotifications(
-                () => new SyntaxReceiver(_attributeDefinition));
-        }
-
-        private void InjectStaticSourceFiles(
-            GeneratorPostInitializationContext postInitializationContext)
-        {
-            postInitializationContext.AddSource(
-                _attributeDefinition.FileName,
-                _attributeDefinition.GetCode());
+                () => new SyntaxReceiver(_attribute));
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -42,15 +34,17 @@ namespace AutoStar.PrimaryConstructor
                     return;
                 }
 
-                var (units, failures) = new Scanner(_attributeDefinition, context.Compilation)
-                    .BuildFrom(receiver.CandidateClasses)
-                    .SeparateResults();
+                var (units, failures) =
+                    new Scanner(_attribute, context.Compilation)
+                        .BuildFrom(receiver.CandidateClasses)
+                        .SeparateResults();
 
                 diagnostics.ReportMethodFailures(failures);
 
                 foreach (var compilationUnit in units)
                 {
-                    context.AddCodeFile(new CompilationUnitFileGenerator(compilationUnit));
+                    context.AddCodeFile(
+                        new CompilationUnitFileGenerator(compilationUnit));
                 }
             }
             catch (Exception ex)
@@ -59,16 +53,25 @@ namespace AutoStar.PrimaryConstructor
             }
         }
 
+        private void InjectStaticSourceFiles(
+            GeneratorPostInitializationContext postInitializationContext)
+        {
+            postInitializationContext.AddSource(
+                _attribute.FileName,
+                _attribute.GetCode());
+        }
+
         internal class SyntaxReceiver : ISyntaxReceiver
         {
-            private readonly MarkerAttributeDefinition _attributeDefinition;
+            private readonly MarkerAttribute _attribute;
 
-            public SyntaxReceiver(MarkerAttributeDefinition attributeDefinition)
+            public SyntaxReceiver(MarkerAttribute attribute)
             {
-                _attributeDefinition = attributeDefinition;
+                _attribute = attribute;
             }
 
-            public IList<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
+            public IList<ClassDeclarationSyntax> CandidateClasses { get; } =
+                new List<ClassDeclarationSyntax>();
 
             public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
             {
@@ -78,7 +81,10 @@ namespace AutoStar.PrimaryConstructor
                         .SelectMany(x => x.Attributes)
                         .ToList();
 
-                    if (attrs.Any(_attributeDefinition.Matches)) CandidateClasses.Add(classDeclarationSyntax);
+                    if (attrs.Any(_attribute.Matches))
+                    {
+                        CandidateClasses.Add(classDeclarationSyntax);
+                    }
                 }
             }
         }

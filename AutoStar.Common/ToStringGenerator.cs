@@ -21,12 +21,11 @@ namespace AutoStar.Common
 
         private static MethodDeclarationSyntax GenerateToStringMethodForMembers(
             IEnumerable<MemberDeclarationSyntax> members,
-            SyntaxToken classIdentifier)
-        {
-            return SyntaxFactory.MethodDeclaration(
-                attributeLists: SyntaxFactory.List<AttributeListSyntax>(),
-                modifiers: GetToStringModifiers(),
-                returnType: SyntaxFactory.IdentifierName("string"),
+            SyntaxToken classIdentifier) =>
+            SyntaxFactory.MethodDeclaration(
+                SyntaxFactory.List<AttributeListSyntax>(),
+                GetToStringModifiers(),
+                SyntaxFactory.IdentifierName("string"),
                 identifier: SyntaxFactory.Identifier("ToString"),
                 parameterList: SyntaxFactory.ParameterList(),
                 constraintClauses:
@@ -35,7 +34,6 @@ namespace AutoStar.Common
                 typeParameterList: null,
                 explicitInterfaceSpecifier: null,
                 expressionBody: null);
-        }
 
         private static BlockSyntax GetToStringBody(
             IEnumerable<MemberDeclarationSyntax> members,
@@ -102,7 +100,7 @@ namespace AutoStar.Common
                                 SyntaxFactory.Argument(
                                     SyntaxFactory.LiteralExpression(
                                         SyntaxKind.StringLiteralExpression,
-                                        SyntaxFactory.Literal($", "))))))));
+                                        SyntaxFactory.Literal(", "))))))));
         }
 
         private static void AddStringBuilderClassHeader(
@@ -219,12 +217,10 @@ namespace AutoStar.Common
                                         SyntaxFactory.Literal($"{memberName} = "))))))));
         }
 
-        private static SyntaxTokenList GetToStringModifiers()
-        {
-            return SyntaxFactory.TokenList(
+        private static SyntaxTokenList GetToStringModifiers() =>
+            SyntaxFactory.TokenList(
                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),
                 SyntaxFactory.Token(SyntaxKind.OverrideKeyword));
-        }
 
         private static IEnumerable<MemberDeclarationSyntax> GetQualifyingMembers(
             ClassDeclarationSyntax classDeclaration)
