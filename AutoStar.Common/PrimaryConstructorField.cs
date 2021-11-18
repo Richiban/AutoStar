@@ -1,27 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace AutoStar.EnumClass
+namespace AutoStar.Common
 {
-    public class IdentifierName
+    public class PrimaryConstructorField
     {
-        private readonly IReadOnlyList<string> _parts;
-
-        private IdentifierName(string original, IReadOnlyList<string> parts)
+        public PrimaryConstructorField(string fieldName, string typeName) : this(
+            fieldName,
+            typeName,
+            SplitName(fieldName))
         {
-            _parts = parts;
-            Original = original;
         }
 
-        public string Original { get; }
-
-        public static IdentifierName Parse(string original)
+        private PrimaryConstructorField(
+            string fieldName,
+            string typeName,
+            IReadOnlyList<string> parts)
         {
-            var parts = SplitName(original);
+            FieldName = fieldName;
+            TypeName = typeName;
 
-            return new(original, parts);
+            _parameterName = new Lazy<string>(() => ToCamelCase(parts));
         }
+
+        public string FieldName { get; }
+        public string TypeName { get; }
 
         private static string[] SplitName(string original)
         {
@@ -39,11 +47,13 @@ namespace AutoStar.EnumClass
                     case '_': continue;
                     case >= 'a' and <= 'z':
                         buffer.Append(c);
+
                         break;
                     default:
                         words.Add(buffer.ToString());
                         buffer.Clear();
                         buffer.Append(c);
+
                         break;
                 }
             }
@@ -53,14 +63,15 @@ namespace AutoStar.EnumClass
             return words.ToArray();
         }
 
+        private readonly Lazy<string> _parameterName;
 
-        public string ToParameterNaming() => ToCamelCase();
+        public string ParameterName => _parameterName.Value;
 
-        private string ToCamelCase()
+        private static string ToCamelCase(IEnumerable<string> parts)
         {
             var sb = new StringBuilder();
 
-            foreach (var part in _parts)
+            foreach (var part in parts)
             {
                 if (sb.Length == 0)
                 {
@@ -75,5 +86,13 @@ namespace AutoStar.EnumClass
 
             return sb.ToString();
         }
+
+        public static ImmutableArray<PrimaryConstructorField> From(
+            FieldDeclarationSyntax fieldDeclarationSyntax) =>
+            fieldDeclarationSyntax.Declaration.Variables.Select(
+                    x => new PrimaryConstructorField(
+                        x.Identifier.Text,
+                        fieldDeclarationSyntax.Declaration.Type.ToString()))
+                .ToImmutableArray();
     }
 }

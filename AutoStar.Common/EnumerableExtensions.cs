@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 
-namespace AutoStar.EnumClass
+namespace AutoStar.Common
 {
-    internal static class EnumerableExtensions
+    public static class EnumerableExtensions
     {
         public static IEnumerable<TResult> SelectNotNull<T, TResult>(
             this IEnumerable<T> source,
@@ -27,7 +27,7 @@ namespace AutoStar.EnumClass
 
         public static (ImmutableArray<TSuccess> Successes, ImmutableArray<TError> Failures
             ) SeparateResults<TSuccess, TError>(
-                this IEnumerable<MaybeResult<TError, TSuccess>> source)
+                this IEnumerable<ResultOption<TError, TSuccess>> source)
         {
             var successes = ImmutableArray.CreateBuilder<TSuccess>();
             var failures = ImmutableArray.CreateBuilder<TError>();
@@ -36,17 +36,17 @@ namespace AutoStar.EnumClass
             {
                 switch (item)
                 {
-                    case MaybeResult<TError, TSuccess>.Ok(var success):
+                    case ResultOption<TError, TSuccess>.Ok(var success):
                         successes.Add(success);
 
                         break;
 
-                    case MaybeResult<TError, TSuccess>.Err(var failure):
+                    case ResultOption<TError, TSuccess>.Err(var failure):
                         failures.Add(failure);
 
                         break;
 
-                    case MaybeResult<TError, TSuccess>.None:
+                    case ResultOption<TError, TSuccess>.None:
                         break;
                 }
             }

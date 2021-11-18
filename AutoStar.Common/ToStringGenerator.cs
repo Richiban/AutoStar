@@ -7,9 +7,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.Common
 {
-    public class ToStringGenerator
+    public static class ToStringGenerator
     {
-        public MemberDeclarationSyntax GenerateToStringMethodForClass(
+        public static MethodDeclarationSyntax GenerateToStringMethodForClass(
             ClassDeclarationSyntax classDeclaration)
         {
             var qualifyingMembers = GetQualifyingMembers(classDeclaration);
@@ -19,7 +19,7 @@ namespace AutoStar.Common
                 classDeclaration.Identifier);
         }
 
-        private MemberDeclarationSyntax GenerateToStringMethodForMembers(
+        private static MethodDeclarationSyntax GenerateToStringMethodForMembers(
             IEnumerable<MemberDeclarationSyntax> members,
             SyntaxToken classIdentifier)
         {
@@ -37,7 +37,7 @@ namespace AutoStar.Common
                 expressionBody: null);
         }
 
-        private BlockSyntax GetToStringBody(
+        private static BlockSyntax GetToStringBody(
             IEnumerable<MemberDeclarationSyntax> members,
             SyntaxToken classIdentifier)
         {
@@ -73,7 +73,7 @@ namespace AutoStar.Common
             return SyntaxFactory.Block(statements);
         }
 
-        private void AddReturnStringBuilderToString(
+        private static void AddReturnStringBuilderToString(
             List<StatementSyntax> statements,
             IdentifierNameSyntax builder)
         {
@@ -86,7 +86,7 @@ namespace AutoStar.Common
                             SyntaxFactory.IdentifierName("ToString")))));
         }
 
-        private void AddMemberStringSeparator(
+        private static void AddMemberStringSeparator(
             List<StatementSyntax> statements,
             IdentifierNameSyntax builder)
         {
@@ -219,14 +219,14 @@ namespace AutoStar.Common
                                         SyntaxFactory.Literal($"{memberName} = "))))))));
         }
 
-        private SyntaxTokenList GetToStringModifiers()
+        private static SyntaxTokenList GetToStringModifiers()
         {
             return SyntaxFactory.TokenList(
                 SyntaxFactory.Token(SyntaxKind.PublicKeyword),
                 SyntaxFactory.Token(SyntaxKind.OverrideKeyword));
         }
 
-        private IEnumerable<MemberDeclarationSyntax> GetQualifyingMembers(
+        private static IEnumerable<MemberDeclarationSyntax> GetQualifyingMembers(
             ClassDeclarationSyntax classDeclaration)
         {
             return classDeclaration.Members.Where(
@@ -234,7 +234,7 @@ namespace AutoStar.Common
                       it is PropertyDeclarationSyntax p && IsAutoProperty(p));
         }
 
-        public bool IsAutoProperty(PropertyDeclarationSyntax propertyDeclaration)
+        private static bool IsAutoProperty(PropertyDeclarationSyntax propertyDeclaration)
         {
             return propertyDeclaration.AccessorList?.Accessors.All(
                 it => it.Body is null) == true;

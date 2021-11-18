@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using AutoStar.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.EnumClass
 {
-    internal class ModelBuilder
+    internal class Scanner
     {
         private readonly EnumClassAttributeDefinition _attributeDefinition;
         private readonly Compilation _compilation;
 
-        public ModelBuilder(
+        public Scanner(
             EnumClassAttributeDefinition attributeDefinition,
             Compilation compilation)
         {
@@ -20,11 +21,11 @@ namespace AutoStar.EnumClass
             _compilation = compilation;
         }
 
-        public ImmutableArray<MaybeResult<ModelFailure, EnumClassModel>> BuildFrom(
+        public ImmutableArray<ResultOption<ModelFailure, EnumClassModel>> BuildFrom(
             IEnumerable<ClassDeclarationSyntax> candidateClasses) =>
             candidateClasses.Select(Map).ToImmutableArray();
 
-        private MaybeResult<ModelFailure, EnumClassModel> Map(
+        private ResultOption<ModelFailure, EnumClassModel> Map(
             ClassDeclarationSyntax classDeclaration)
         {
             var model = _compilation.GetSemanticModel(classDeclaration.SyntaxTree);
@@ -37,10 +38,10 @@ namespace AutoStar.EnumClass
                     classDeclaration.GetLocation());
 
             if (!ClassHasCorrectAttribute(classSymbol))
-                return new MaybeResult<ModelFailure, EnumClassModel>.None();
+                return new ResultOption<ModelFailure, EnumClassModel>.None();
 
             if (GetInnerClasses(classDeclaration) is not { Count: > 0 } innerClasses)
-                return new MaybeResult<ModelFailure, EnumClassModel>.None();
+                return new ResultOption<ModelFailure, EnumClassModel>.None();
 
             if (!ClassIsPartial(classDeclaration))
                 return new ModelFailure(

@@ -32,7 +32,7 @@ public class TestClass
                 .OfType<ClassDeclarationSyntax>()
                 .Single();
 
-            var actual = new ToStringGenerator().GenerateToStringMethodForClass(input)
+            var actual = ToStringGenerator.GenerateToStringMethodForClass(input)
                 .NormalizeWhitespace()
                 .ToFullString();
 

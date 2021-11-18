@@ -2,9 +2,9 @@
 
 namespace AutoStar.PrimaryConstructor
 {
-    internal class ModelFailure
+    internal class ScanFailure
     {
-        public ModelFailure(ErrorId errorId, string message, Location? location)
+        public ScanFailure(ErrorId errorId, string message, Location? location)
         {
             Message = message;
             Location = location;

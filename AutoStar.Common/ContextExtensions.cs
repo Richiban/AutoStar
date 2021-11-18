@@ -1,14 +1,15 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace AutoStar.EnumClass
+namespace AutoStar.Common
 {
-    internal static class ContextExtensions
+    public static class ContextExtensions
     {
         public static void AddCodeFile(
             this GeneratorExecutionContext context,
-            CodeFileGenerator codeFileGenerator) =>
+            ICodeFileGenerator codeFileGenerator) =>
             context.AddSource(
                 codeFileGenerator.FileName,
                 SourceText.From(codeFileGenerator.GetCode(), Encoding.UTF8));

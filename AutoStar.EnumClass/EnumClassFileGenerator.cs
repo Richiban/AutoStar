@@ -1,23 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoStar.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.EnumClass
 {
-    class EnumClassFileGenerator : CodeFileGenerator
+    class EnumClassFileGenerator : ICodeFileGenerator
     {
         private readonly EnumClassModel _model;
 
-        public EnumClassFileGenerator(EnumClassModel model) : base(
-            model.ClassName + ".g.cs")
+        public EnumClassFileGenerator(EnumClassModel model)
         {
             _model = model;
+            FileName = model.ClassName + ".g.cs";
         }
 
-        public override string GetCode()
+        public string FileName { get; }
+
+        public string GetCode()
         {
             var root = _model.ClassDeclaration.SyntaxTree.GetRoot();
 

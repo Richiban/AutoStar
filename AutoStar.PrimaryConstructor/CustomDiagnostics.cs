@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace AutoStar.PrimaryConstructor
@@ -13,7 +14,7 @@ namespace AutoStar.PrimaryConstructor
             _context = context;
         }
 
-        public void ReportModelFailure(ModelFailure failure)
+        public void ReportModelFailure(ScanFailure failure)
         {
             _context.ReportDiagnostic(
                 Diagnostic.Create(
@@ -27,7 +28,7 @@ namespace AutoStar.PrimaryConstructor
                     failure.Location));
         }
 
-        public void ReportMethodFailures(IEnumerable<ModelFailure> failures)
+        public void ReportMethodFailures(IEnumerable<ScanFailure> failures)
         {
             foreach (var failure in failures)
             {
@@ -41,8 +42,8 @@ namespace AutoStar.PrimaryConstructor
                 Diagnostic.Create(
                     new DiagnosticDescriptor(
                         "Cmdr0004",
-                        "Unhandled exception",
-                        $"There was an unhandled exception: {ex.Message}",
+                        "There was an unhandled exception: {ex.Message}",
+                        $"{ex.StackTrace}",
                         "Cmdr",
                         DiagnosticSeverity.Error,
                         isEnabledByDefault: true),

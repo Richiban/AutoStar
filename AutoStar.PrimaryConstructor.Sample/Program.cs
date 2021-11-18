@@ -1,19 +1,7 @@
 ﻿using System;
 
-namespace Sample
+namespace AutoStar.PrimaryConstructor.Sample
 {
-    [PrimaryConstructor]
-    partial class Service
-    {
-        private readonly Guid _data;
-        private readonly string _name;
-
-        public override string ToString()
-        {
-            return $"{nameof(Service)}: {_name}\n{_data}";
-        }
-    }
-
     class Program
     {
         static void Main(string[] args)

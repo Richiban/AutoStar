@@ -1,6 +1,8 @@
-﻿namespace AutoStar.EnumClass
+﻿using System;
+
+namespace AutoStar.Common
 {
-    internal abstract class Result<TError, TSuccess>
+    public abstract class Result<TError, TSuccess>
     {
         private Result()
         {

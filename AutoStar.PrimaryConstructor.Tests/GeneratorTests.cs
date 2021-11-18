@@ -95,7 +95,7 @@ namespace TestSamples
         }
 
         [Test]
-        public void DummyTest()
+        public void SimplestTestCase()
         {
             var source = @"
 using System;
@@ -121,15 +121,14 @@ namespace TestSamples
 
 namespace TestSamples
 {
-    public partial class TestClass
+    partial class TestClass
     {
         public TestClass(string data)
         {
             _data = data;
         }
     }
-}
-");
+}");
         }
 
         private static SyntaxTree GetSourceFile(Compilation outputCompilation, string fileName)
@@ -150,7 +149,7 @@ namespace TestSamples
                 },
                 new CSharpCompilationOptions(OutputKind.ConsoleApplication));
 
-            var generator = new PrimaryConstructorGenerator();
+            var generator = new PrimaryConstructorSourceGenerator();
 
             var driver = CSharpGeneratorDriver.Create(generator)
                 .RunGeneratorsAndUpdateCompilation(

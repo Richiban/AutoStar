@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoStar.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -44,7 +45,7 @@ namespace AutoStar.EnumClass
                     return;
                 }
 
-                var (models, failures) = new ModelBuilder(_attributeDefinition, context.Compilation)
+                var (models, failures) = new Scanner(_attributeDefinition, context.Compilation)
                     .BuildFrom(receiver.CandidateClasses)
                     .SeparateResults();
 

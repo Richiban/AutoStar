@@ -1,35 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoStar.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.PrimaryConstructor
 {
     [Generator]
-    public class PrimaryConstructorGenerator : ISourceGenerator
+    public class PrimaryConstructorSourceGenerator : ISourceGenerator
     {
-        private PrimaryConstructorAttributeDefinition _cmdrAttribute = null!;
+        private MarkerAttributeDefinition _attributeDefinition = null!;
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            _cmdrAttribute = new PrimaryConstructorAttributeDefinition();
+            _attributeDefinition = new MarkerAttributeDefinition("PrimaryConstructor");
 
             context.RegisterForPostInitialization(InjectStaticSourceFiles);
 
             context.RegisterForSyntaxNotifications(
-                () => new SyntaxReceiver(_cmdrAttribute));
+                () => new SyntaxReceiver(_attributeDefinition));
         }
 
         private void InjectStaticSourceFiles(
             GeneratorPostInitializationContext postInitializationContext)
         {
-            var cmdrAttributeFileGenerator =
-                new AttributeFileGenerator(_cmdrAttribute);
-
             postInitializationContext.AddSource(
-                cmdrAttributeFileGenerator.FileName,
-                cmdrAttributeFileGenerator.GetCode());
+                _attributeDefinition.FileName,
+                _attributeDefinition.GetCode());
         }
 
         public void Execute(GeneratorExecutionContext context)
@@ -44,15 +42,15 @@ namespace AutoStar.PrimaryConstructor
                     return;
                 }
 
-                var (models, failures) = new ModelBuilder(_cmdrAttribute, context.Compilation)
+                var (units, failures) = new Scanner(_attributeDefinition, context.Compilation)
                     .BuildFrom(receiver.CandidateClasses)
                     .SeparateResults();
 
                 diagnostics.ReportMethodFailures(failures);
 
-                foreach (var model in models)
+                foreach (var compilationUnit in units)
                 {
-                    context.AddCodeFile(new PrimaryConstructorClassFileGenerator(model));
+                    context.AddCodeFile(new CompilationUnitFileGenerator(compilationUnit));
                 }
             }
             catch (Exception ex)
@@ -63,9 +61,9 @@ namespace AutoStar.PrimaryConstructor
 
         internal class SyntaxReceiver : ISyntaxReceiver
         {
-            private readonly PrimaryConstructorAttributeDefinition _attributeDefinition;
+            private readonly MarkerAttributeDefinition _attributeDefinition;
 
-            public SyntaxReceiver(PrimaryConstructorAttributeDefinition attributeDefinition)
+            public SyntaxReceiver(MarkerAttributeDefinition attributeDefinition)
             {
                 _attributeDefinition = attributeDefinition;
             }

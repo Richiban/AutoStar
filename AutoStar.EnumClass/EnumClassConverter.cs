@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AutoStar.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -57,8 +58,19 @@ namespace AutoStar.EnumClass
         private static SyntaxList<MemberDeclarationSyntax> GetNewMembers(
             ClassDeclarationSyntax classDeclaration)
         {
-            var memberDeclarations =
-                new List<MemberDeclarationSyntax> { GetNewConstructor(classDeclaration) };
+            var (objectEqualsMethod, equatableEqualsMethod) =
+                EqualsGenerator.GenerateEqualsMethodForClass(classDeclaration);
+
+            var toStringMethod =
+                ToStringGenerator.GenerateToStringMethodForClass(classDeclaration);
+
+            var memberDeclarations = new List<MemberDeclarationSyntax>
+            {
+                GetNewConstructor(classDeclaration),
+                objectEqualsMethod,
+                equatableEqualsMethod,
+                toStringMethod
+            };
 
             memberDeclarations.AddRange(GetPartialInnerClasses(classDeclaration));
 
