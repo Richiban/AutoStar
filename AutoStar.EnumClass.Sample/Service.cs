@@ -2,7 +2,7 @@
 
 namespace AutoStar.EnumClass.Sample
 {
-    [EnumClassA]
+    [EnumClass]
     internal partial class Service
     {
         partial class TypeA

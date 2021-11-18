@@ -23,7 +23,7 @@
         </PackageReference>
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\AutoStar.Common\AutoStar.Common.csproj" />
-    </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\AutoStar.Common\*.cs" LinkBase="Common" />
+	</ItemGroup>
 </Project>
