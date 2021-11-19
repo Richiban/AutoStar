@@ -104,5 +104,17 @@ namespace AutoStar.Common
                 yield return e.Current;
             }
         }
+
+        public static Option<T> TrySingle<T>(this IEnumerable<T> source)
+        {
+            using var e = source.GetEnumerator();
+
+            if (e.MoveNext() && e.Current is var first && !e.MoveNext())
+            {
+                return first;
+            }
+
+            return default(None);
+        }
     }
 }

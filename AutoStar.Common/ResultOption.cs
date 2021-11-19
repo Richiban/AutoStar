@@ -59,6 +59,11 @@ namespace AutoStar.Common
             {
                 error = Error;
             }
+
+            public ResultOption<TError, TX>.Err Convert<TX>()
+            {
+                return new ResultOption<TError, TX>.Err(Error);
+            }
         }
 
         public class None : ResultOption<TError, TSuccess>

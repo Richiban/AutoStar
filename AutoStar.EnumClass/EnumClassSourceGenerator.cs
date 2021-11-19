@@ -1,7 +1,7 @@
-﻿using System;
-using AutoStar.Common;
-using System.Linq;
+﻿using AutoStar.Common;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
 
 namespace AutoStar.EnumClass
 {

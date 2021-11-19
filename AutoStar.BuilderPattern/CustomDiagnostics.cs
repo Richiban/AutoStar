@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
 namespace AutoStar.BuilderPattern
 {
-    public class CustomDiagnostics
+    class CustomDiagnostics
     {
         private readonly GeneratorExecutionContext _context;
 
@@ -12,14 +14,40 @@ namespace AutoStar.BuilderPattern
             _context = context;
         }
 
-        public void ReportMethodFailures(object failures)
+        public void ReportMethodFailures(IEnumerable<CodeGenerationFailure> failures)
         {
-            throw new NotImplementedException();
+            foreach (var scanFailure in failures)
+            {
+                ReportMethodFailure(scanFailure);
+            }
+        }
+
+        private void ReportMethodFailure(CodeGenerationFailure failure)
+        {
+            _context.ReportDiagnostic(
+                Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        failure.ErrorId.ToString(),
+                        "Failed to register method",
+                        failure.Message,
+                        "Cmdr",
+                        DiagnosticSeverity.Error,
+                        isEnabledByDefault: true),
+                    failure.Location));
         }
 
         public void ReportUnknownError(Exception exception)
         {
-            throw new NotImplementedException();
+            _context.ReportDiagnostic(
+                Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "Cmdr0004",
+                        "Unhandled exception",
+                        $"{exception}",
+                        "Cmdr",
+                        DiagnosticSeverity.Error,
+                        isEnabledByDefault: true),
+                    location: null));
         }
     }
 }

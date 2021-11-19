@@ -22,7 +22,7 @@ namespace AutoStar.Common
         private static string GetFileName(CompilationUnitSyntax compilationUnit) =>
             compilationUnit.DescendantNodes()
                 .OfType<ClassDeclarationSyntax>()
-                .Single()
+                .First()
                 .Identifier + ".g.cs";
     }
 }

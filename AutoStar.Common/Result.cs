@@ -37,5 +37,13 @@ namespace AutoStar.Common
 
             public void Deconstruct(out TError error) => error = _error;
         }
+
+        public Result<TError, TResult> MapSuccess<TResult>(Func<TSuccess, TResult> func) =>
+            this switch
+            {
+                Ok(var value) => new Result<TError, TResult>.Ok(func(value)),
+                Error(var error) => new Result<TError, TResult>.Error(error),
+                _ => throw new ArgumentOutOfRangeException()
+            };
     }
 }

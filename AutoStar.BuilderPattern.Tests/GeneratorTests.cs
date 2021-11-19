@@ -15,12 +15,7 @@ namespace AutoStar.BuilderPattern.Tests
         [Test]
         public void InjectedAttributeFileTest()
         {
-            var source = @"
-[BuilderPattern]
-public partial class TestClass
-{
-}
-";
+            var source = @"";
 
             var (outputCompilation, diagnostics) = RunGenerator(source);
 
@@ -65,7 +60,7 @@ namespace TestSamples
         }
 
         [Test]
-        public void BaseCase()
+        public void MultipleConstructorsGivesDiagnosticError()
         {
             var source = @"
 namespace TestSamples
@@ -73,32 +68,25 @@ namespace TestSamples
     [BuilderPattern]
     public partial class TestClass
     {
+        public TestClass() {}
+        public TestClass(string a) {}
     }
 }
 ";
 
             var (compilation, diagnostics) = RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            var diagnostic = diagnostics.ShouldHaveSingleItem();
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs")
-                .GetText()
-                .ToString();
+            diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
 
-            programText.ShouldBe(
-                @"namespace TestSamples
-{
-    public partial class TestClass
-    {
-        public class Builder
-        {
-        }
-    }
-}");
+            diagnostic.GetMessage()
+                .ShouldBe(
+                    "Class TestClass must define exactly one constructor to use the BuilderPattern attribute");
         }
 
         [Test]
-        public void SimpleCase()
+        public void PrimaryConstructorAlsoGenerated()
         {
             var source = @"
 namespace TestSamples
@@ -159,6 +147,89 @@ namespace TestSamples
         {
             public BuilderException(string message) : base(message)
             {
+            }
+        }
+    }
+}");
+        }[Test]
+        public void ExplicitConstructorGiven()
+        {
+            var source = @"using System;
+
+namespace TestSamples
+{
+    [BuilderPattern]
+    public partial class TestClass
+    {
+        public TestClass(string a, string b, int c)
+        {
+            A = a;
+            B = b;
+            C = c;
+        }
+
+        public string A { get; }
+        public string B { get; }
+        public int    C { get; }
+    }
+}
+";
+
+            var (compilation, diagnostics) = RunGenerator(source);
+
+            Assert.That(diagnostics, Is.Empty);
+
+            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+                .GetText()
+                .ToString();
+
+            programText.ShouldBe(
+                @"using System;
+
+namespace TestSamples
+{
+    partial class TestClass
+    {
+        public class Builder
+        {
+            public string A { get; set; }
+
+            public string B { get; set; }
+
+            public int C { get; set; }
+
+            public TestClass Build()
+            {
+                var validationFailures = new System.Collections.Generic.List<string>();
+
+                if (A == null)
+                {
+                    validationFailures.Add(""A is null"");
+                }
+
+                if (B == null)
+                {
+                    validationFailures.Add(""B is null"");
+                }
+
+                if (validationFailures.Count > 0)
+                {
+                    throw new BuilderException(validationFailures);
+                }
+
+                return new TestClass(A, B, C);
+            }
+        }
+
+        public class BuilderException : System.Exception
+        {
+            public BuilderException(params string[] validationFailures) : base(GetMessage(validationFailures))
+            {
+            }
+
+            private static string GetMessage(System.Collections.Generic.IEnumerable<string> validationFailures)
+            {
+                return string.Join(System.Environment.NewLine, validationFailures);
             }
         }
     }

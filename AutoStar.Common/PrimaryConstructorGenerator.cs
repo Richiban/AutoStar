@@ -27,7 +27,7 @@ namespace AutoStar.Common
 
         private static ConstructorDeclarationSyntax GetNewConstructor(
             SyntaxToken classIdentifier,
-            ImmutableArray<PrimaryConstructorField> fields) =>
+            ImmutableArray<PrimaryConstructorParameter> fields) =>
             SyntaxFactory.ConstructorDeclaration(classIdentifier)
                 .WithBody(GetConstructorBody(fields))
                 .WithParameterList(GetParameterList(fields))
@@ -35,39 +35,38 @@ namespace AutoStar.Common
                     SyntaxFactory.TokenList(
                         SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
 
-        private static ImmutableArray<PrimaryConstructorField> GetFields(
+        private static ImmutableArray<PrimaryConstructorParameter> GetFields(
             ClassDeclarationSyntax classDeclarationSyntax)
         {
             return classDeclarationSyntax.ChildNodes()
                 .OfType<FieldDeclarationSyntax>()
                 .Where(f => f.Modifiers.Any(m => m.IsKind(SyntaxKind.ReadOnlyKeyword)))
-                .SelectMany(f => PrimaryConstructorField.From(f))
+                .SelectMany(f => PrimaryConstructorParameter.FromField(f))
                 .ToImmutableArray();
         }
 
         private static BlockSyntax GetConstructorBody(
-            IEnumerable<PrimaryConstructorField> fields) =>
+            IEnumerable<PrimaryConstructorParameter> fields) =>
             SyntaxFactory.Block(SyntaxFactory.List(fields.Select(GetFieldAssignment)));
 
         private static ParameterListSyntax GetParameterList(
-            IEnumerable<PrimaryConstructorField> fields) =>
+            IEnumerable<PrimaryConstructorParameter> fields) =>
             SyntaxFactory.ParameterList(
                 SyntaxFactory.SeparatedList(fields.Select(MapParameter)));
 
-        private static ParameterSyntax MapParameter(PrimaryConstructorField field)
+        private static ParameterSyntax MapParameter(PrimaryConstructorParameter parameter)
         {
-            var identifier = SyntaxFactory.Identifier(field.ParameterName);
+            var identifier = SyntaxFactory.Identifier(parameter.ParameterName);
 
-            return SyntaxFactory.Parameter(identifier)
-                .WithType(SyntaxFactory.IdentifierName(field.TypeName));
+            return SyntaxFactory.Parameter(identifier).WithType(parameter.Type);
         }
 
         private static ExpressionStatementSyntax GetFieldAssignment(
-            PrimaryConstructorField field)
+            PrimaryConstructorParameter parameter)
         {
-            var fieldIdentifier = SyntaxFactory.IdentifierName(field.FieldName);
+            var fieldIdentifier = SyntaxFactory.IdentifierName(parameter.MemberName);
 
-            var parameterIdentifier = SyntaxFactory.IdentifierName(field.ParameterName);
+            var parameterIdentifier = SyntaxFactory.IdentifierName(parameter.ParameterName);
 
             var assignmentExpression = SyntaxFactory.AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
