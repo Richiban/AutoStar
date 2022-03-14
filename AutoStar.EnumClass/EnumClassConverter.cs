@@ -107,6 +107,7 @@ namespace AutoStar.EnumClass
             TypeSyntax typeSyntax = SyntaxFactory.IdentifierName(outerClassName);
 
             return innerClassDeclaration
+                .WithMembers(new SyntaxList<MemberDeclarationSyntax>())
                 .WithModifiers(
                     SyntaxFactory.TokenList(
                         SyntaxFactory.Token(SyntaxKind.PublicKeyword),

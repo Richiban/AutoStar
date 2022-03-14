@@ -13,7 +13,7 @@ namespace AutoStar.Common
         public static Option<ConstructorDeclarationSyntax> GetNewConstructor(
             ClassDeclarationSyntax classDeclaration)
         {
-            var fields = GetFields(classDeclaration);
+            var fields = GetReadonlyFieldsAndProperties(classDeclaration);
 
             if (!fields.Any())
             {
@@ -35,15 +35,30 @@ namespace AutoStar.Common
                     SyntaxFactory.TokenList(
                         SyntaxFactory.Token(SyntaxKind.PublicKeyword)));
 
-        private static ImmutableArray<PrimaryConstructorParameter> GetFields(
+        private static ImmutableArray<PrimaryConstructorParameter> GetReadonlyFieldsAndProperties(
             ClassDeclarationSyntax classDeclarationSyntax)
         {
-            return classDeclarationSyntax.ChildNodes()
+            var parametersFromFields = classDeclarationSyntax.ChildNodes()
                 .OfType<FieldDeclarationSyntax>()
                 .Where(f => f.Modifiers.Any(m => m.IsKind(SyntaxKind.ReadOnlyKeyword)))
-                .SelectMany(f => PrimaryConstructorParameter.FromField(f))
+                .SelectMany(PrimaryConstructorParameter.FromField);
+
+            var parametersFromProperties = classDeclarationSyntax.ChildNodes()
+                .OfType<PropertyDeclarationSyntax>()
+                .Where(IsGetOnlyAutoProperty)
+                .Select(PrimaryConstructorParameter.FromProperty);
+
+            return parametersFromFields
+                .Concat(parametersFromProperties)
                 .ToImmutableArray();
         }
+
+        private static bool IsGetOnlyAutoProperty(PropertyDeclarationSyntax p) =>
+            p.AccessorList?.Accessors switch
+            {
+                { Count: 1 } accessors => accessors.All(it => it.Body is null),
+                _ => false
+            };
 
         private static BlockSyntax GetConstructorBody(
             IEnumerable<PrimaryConstructorParameter> fields) =>

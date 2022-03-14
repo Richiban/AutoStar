@@ -27,7 +27,7 @@ namespace AutoStar.EnumClass
                     failure.Location));
         }
 
-        public void ReportMethodFailures(IEnumerable<ModelFailure> failures)
+        public void ReportFailures(IEnumerable<ModelFailure> failures)
         {
             foreach (var failure in failures)
             {

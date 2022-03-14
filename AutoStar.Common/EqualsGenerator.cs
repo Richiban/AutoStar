@@ -16,13 +16,13 @@ namespace AutoStar.Common
         {
             var qualifyingMembers = GetQualifyingMembers(classDeclaration);
 
-            return (GenerateObjectEqualsMethod(),
+            return (GenerateObjectEqualsMethod(classDeclaration.Identifier.Text),
                 GenerateEqualsMethodForMembers(
                     qualifyingMembers,
                     classDeclaration.Identifier));
         }
 
-        private static MethodDeclarationSyntax GenerateObjectEqualsMethod() =>
+        private static MethodDeclarationSyntax GenerateObjectEqualsMethod(string typeName) =>
             MethodDeclaration(
                     PredefinedType(Token(SyntaxKind.BoolKeyword)),
                     Identifier("Equals"))
@@ -43,7 +43,7 @@ namespace AutoStar.Common
                             IsPatternExpression(
                                 IdentifierName("other"),
                                 DeclarationPattern(
-                                    IdentifierName("TestClass"),
+                                    IdentifierName(typeName),
                                     SingleVariableDesignation(Identifier("otherClass")))),
                             InvocationExpression(IdentifierName("Equals"))
                                 .WithArgumentList(

@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.Immutable;
-using System.Reflection;
 using System.Linq;
+using AutoStar.Tests.Common;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
 using Shouldly;
 
@@ -12,16 +12,19 @@ namespace AutoStar.BuilderPattern.Tests
     [TestFixture]
     internal class GeneratorTests
     {
+        private readonly GeneratorTestRunner _testRunner =
+            new(new BuilderPatternGenerator());
+
         [Test]
         public void InjectedAttributeFileTest()
         {
             var source = @"";
 
-            var (outputCompilation, diagnostics) = RunGenerator(source);
+            var runResult = _testRunner.RunGenerator(source);
 
-            diagnostics.ShouldBeEmpty();
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            var src = GetSourceFile(outputCompilation, "BuilderPatternAttribute.g.cs")
+            var src = runResult.GetSourceFile("BuilderPatternAttribute.g.cs")
                 .GetText()
                 .ToString();
 
@@ -48,7 +51,7 @@ namespace TestSamples
 }
 ";
 
-            var (_, diagnostics) = RunGenerator(source);
+            var (_, diagnostics) = _testRunner.RunGenerator(source);
 
             var diagnostic = diagnostics.ShouldHaveSingleItem();
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
@@ -74,7 +77,7 @@ namespace TestSamples
 }
 ";
 
-            var (compilation, diagnostics) = RunGenerator(source);
+            var (compilation, diagnostics) = _testRunner.RunGenerator(source);
 
             var diagnostic = diagnostics.ShouldHaveSingleItem();
 
@@ -101,11 +104,11 @@ namespace TestSamples
 }
 ";
 
-            var (compilation, diagnostics) = RunGenerator(source);
+            var runResult = _testRunner.RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+            var programText = runResult.GetSourceFile("TestClass.g.cs")
                 .GetText()
                 .ToString();
 
@@ -151,7 +154,9 @@ namespace TestSamples
         }
     }
 }");
-        }[Test]
+        }
+
+        [Test]
         public void ExplicitConstructorGiven()
         {
             var source = @"using System;
@@ -175,16 +180,15 @@ namespace TestSamples
 }
 ";
 
-            var (compilation, diagnostics) = RunGenerator(source);
+            var runResult = _testRunner.RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+            var actual = runResult.GetSourceFile("TestClass.g.cs")
                 .GetText()
                 .ToString();
 
-            programText.ShouldBe(
-                @"using System;
+            var expected = (@"using System;
 
 namespace TestSamples
 {
@@ -202,14 +206,19 @@ namespace TestSamples
             {
                 var validationFailures = new System.Collections.Generic.List<string>();
 
-                if (A == null)
+                if (A is null)
                 {
                     validationFailures.Add(""A is null"");
                 }
 
-                if (B == null)
+                if (B is null)
                 {
                     validationFailures.Add(""B is null"");
+                }
+
+                if (C is null)
+                {
+                    validationFailures.Add(""C is null"");
                 }
 
                 if (validationFailures.Count > 0)
@@ -223,61 +232,19 @@ namespace TestSamples
 
         public class BuilderException : System.Exception
         {
-            public BuilderException(params string[] validationFailures) : base(GetMessage(validationFailures))
+            public BuilderException(System.Collections.Generic.List<string> validationFailures) : base(GetMessage(validationFailures))
             {
             }
 
             private static string GetMessage(System.Collections.Generic.IEnumerable<string> validationFailures)
             {
-                return string.Join(System.Environment.NewLine, validationFailures);
+                return string.Join(""; "", validationFailures);
             }
         }
     }
 }");
-        }
 
-        private static SyntaxTree GetSourceFile(
-            Compilation outputCompilation,
-            string fileName)
-        {
-            switch (outputCompilation.SyntaxTrees.SingleOrDefault(
-                s => s.FilePath.EndsWith(fileName)))
-            {
-                case { } a:
-                    return a;
-                default:
-
-                    var fileNamesString = string.Join(
-                        ", ",
-                        outputCompilation.SyntaxTrees.Select(s => $"'{s.FilePath}'"));
-
-                    throw new InvalidOperationException(
-                        $"Could not find an output file with the name {fileName}. Files: {fileNamesString}");
-            }
-        }
-
-        private static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(
-            string source)
-        {
-            var inputCompilation = CSharpCompilation.Create(
-                "compilation",
-                new[] { CSharpSyntaxTree.ParseText(source) },
-                new[]
-                {
-                    MetadataReference.CreateFromFile(
-                        typeof(Binder).GetTypeInfo().Assembly.Location)
-                },
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
-
-            var generator = new BuilderPatternGenerator();
-
-            var driver = CSharpGeneratorDriver.Create(generator)
-                .RunGeneratorsAndUpdateCompilation(
-                    inputCompilation,
-                    out var outputCompilation,
-                    out var diagnostics);
-
-            return (outputCompilation, diagnostics);
+            CodeDiffer.AssertEqual(expected, actual);
         }
     }
 }

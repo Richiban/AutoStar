@@ -24,6 +24,9 @@
 
     <ItemGroup>
       <Compile Include="..\AutoStar.Common\*.cs" LinkBase="Common" />
+      <Compile Update="..\AutoStar.Common\IdentifierNaming.cs">
+        <Link>Common\IdentifierNaming.cs</Link>
+      </Compile>
     </ItemGroup>
 
     <ItemGroup>

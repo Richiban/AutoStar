@@ -6,6 +6,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using CodeGenerationResult =
+    AutoStar.Common.ResultOption<AutoStar.BuilderPattern.CodeGenerationFailure, System.
+        Collections.Generic.IReadOnlyList<
+            Microsoft.CodeAnalysis.CSharp.Syntax.ParameterSyntax>>;
 
 namespace AutoStar.BuilderPattern
 {
@@ -39,19 +43,17 @@ namespace AutoStar.BuilderPattern
 
             switch (GetBuildableParameters(attributeMarkedClass))
             {
-                case ResultOption<CodeGenerationFailure, IReadOnlyList<ParameterSyntax>>.
-                    Err error: return error.Convert<CompilationUnitSyntax>();
+                case CodeGenerationResult.Err error:
+                    return error.Convert<CompilationUnitSyntax>();
 
-                case ResultOption<CodeGenerationFailure, IReadOnlyList<ParameterSyntax>>.
-                    Ok(var constructorParameters):
+                case CodeGenerationResult.Ok(var constructorParameters):
                     buildableParameters = constructorParameters
                         .Select(x => PrimaryConstructorParameter.FromParameter(x))
                         .ToList();
 
                     break;
 
-                case ResultOption<CodeGenerationFailure, IReadOnlyList<ParameterSyntax>>
-                    .None:
+                case CodeGenerationResult.None:
                     if (PrimaryConstructorGenerator
                         .GetNewConstructor(attributeMarkedClass)
                         .IsSome(out var primaryConstructor))
@@ -122,8 +124,8 @@ namespace AutoStar.BuilderPattern
                 .WithAttributeLists(List<AttributeListSyntax>());
         }
 
-        private ResultOption<CodeGenerationFailure, IReadOnlyList<ParameterSyntax>>
-            GetBuildableParameters(ClassDeclarationSyntax attributeMarkedClass)
+        private CodeGenerationResult GetBuildableParameters(
+            ClassDeclarationSyntax attributeMarkedClass)
         {
             var constructors = attributeMarkedClass.Members
                 .OfType<ConstructorDeclarationSyntax>()

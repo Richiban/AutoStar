@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Reflection;
 using System.Linq;
 using AutoStar.PrimaryConstructor;
+using AutoStar.Tests.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
@@ -13,6 +14,9 @@ namespace AutoStar.PimaryConstructor.Tests
     [TestFixture]
     internal class GeneratorTests
     {
+        private readonly GeneratorTestRunner _testRunner =
+            new(new PrimaryConstructorSourceGenerator());
+
         [Test]
         public void InjectedAttributeFileTest()
         {
@@ -24,19 +28,19 @@ public partial class TestClass
 }
 ";
 
-            var (outputCompilation, diagnostics) = RunGenerator(source);
+            var runResult = _testRunner.RunGenerator(source);
 
-            diagnostics.ShouldBeEmpty();
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            var fileNames = outputCompilation.SyntaxTrees.Select(s => s.FilePath);
+            var fileNames =
+                runResult.OutputCompilation.SyntaxTrees.Select(s => s.FilePath);
 
-            outputCompilation.SyntaxTrees.Count()
+            runResult.OutputCompilation.SyntaxTrees.Count()
                 .ShouldBe(
                     expected: 3,
                     $"We expected three syntax trees: the original one plus the two we generated. Found: {string.Join(",\n", fileNames)}");
 
-            var cmdrAttributeFile = GetSourceFile(
-                outputCompilation,
+            var cmdrAttributeFile = runResult.GetSourceFile(
                 "PrimaryConstructorAttribute.g.cs");
 
             var src = cmdrAttributeFile.GetText().ToString();
@@ -65,7 +69,7 @@ namespace TestSamples
 }
 ";
 
-            var (_, diagnostics) = RunGenerator(source);
+            var (_, diagnostics) = _testRunner.RunGenerator(source);
 
             var diagnostic = diagnostics.ShouldHaveSingleItem();
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
@@ -90,7 +94,7 @@ namespace TestSamples
 }
 ";
 
-            var (_, diagnostics) = RunGenerator(source);
+            var (_, diagnostics) = _testRunner.RunGenerator(source);
 
             var diagnostic = diagnostics.ShouldHaveSingleItem();
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
@@ -116,11 +120,11 @@ namespace TestSamples
 }
 ";
 
-            var (compilation, diagnostics) = RunGenerator(source);
+            var runResult = _testRunner.RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+            var programText = runResult.GetSourceFile("TestClass.g.cs")
                 .GetText()
                 .ToString();
 
@@ -137,38 +141,6 @@ namespace TestSamples
         }
     }
 }");
-        }
-
-        private static SyntaxTree GetSourceFile(
-            Compilation outputCompilation,
-            string fileName)
-        {
-            return outputCompilation.SyntaxTrees.Single(
-                s => s.FilePath.EndsWith(fileName));
-        }
-
-        private static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(
-            string source)
-        {
-            var inputCompilation = CSharpCompilation.Create(
-                "compilation",
-                new[] { CSharpSyntaxTree.ParseText(source) },
-                new[]
-                {
-                    MetadataReference.CreateFromFile(
-                        typeof(Binder).GetTypeInfo().Assembly.Location)
-                },
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
-
-            var generator = new PrimaryConstructorSourceGenerator();
-
-            var driver = CSharpGeneratorDriver.Create(generator)
-                .RunGeneratorsAndUpdateCompilation(
-                    inputCompilation,
-                    out var outputCompilation,
-                    out var diagnostics);
-
-            return (outputCompilation, diagnostics);
         }
     }
 }

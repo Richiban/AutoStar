@@ -131,7 +131,7 @@ namespace AutoStar.Common
             statements.Add(
                 SyntaxFactory.LocalDeclarationStatement(
                     SyntaxFactory.VariableDeclaration(
-                        SyntaxFactory.IdentifierName("StringBuilder"),
+                        SyntaxFactory.IdentifierName("System.Text.StringBuilder"),
                         SyntaxFactory.SingletonSeparatedList(
                             SyntaxFactory.VariableDeclarator(
                                 SyntaxFactory.Identifier(
@@ -140,7 +140,7 @@ namespace AutoStar.Common
                                 SyntaxFactory.EqualsValueClause(
                                     SyntaxFactory
                                         .ObjectCreationExpression(
-                                            SyntaxFactory.IdentifierName("StringBuilder"))
+                                            SyntaxFactory.IdentifierName("System.Text.StringBuilder"))
                                         .WithArgumentList(
                                             SyntaxFactory.ArgumentList())))))));
         }

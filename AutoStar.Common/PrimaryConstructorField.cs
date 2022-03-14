@@ -31,10 +31,26 @@ namespace AutoStar.Common
                     fieldDeclarationSyntax.Declaration.Type));
         }
 
-        public static PrimaryConstructorParameter FromParameter(ParameterSyntax parameterSyntax) =>
-            new PrimaryConstructorParameter(
-                parameterSyntax.Identifier.ValueText,
-                IdentifierNaming.Create(parameterSyntax.Identifier.ValueText).ToPascalCase(),
+        public static PrimaryConstructorParameter FromParameter(
+            ParameterSyntax parameterSyntax)
+        {
+            var name = parameterSyntax.Identifier.ValueText;
+
+            return new PrimaryConstructorParameter(
+                name,
+                IdentifierNaming.Create(name).ToPascalCase(),
                 parameterSyntax.Type!);
+        }
+
+        public static PrimaryConstructorParameter FromProperty(
+            PropertyDeclarationSyntax propertySyntax)
+        {
+            var name = propertySyntax.Identifier.ValueText;
+
+            return new(
+                name,
+                IdentifierNaming.Create(name).ToPascalCase(),
+                propertySyntax.Type!);
+        }
     }
 }

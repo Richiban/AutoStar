@@ -1,10 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
+using AutoStar.Tests.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
-using Shouldly;
 
 namespace AutoStar.Common.Tests
 {
@@ -38,7 +37,7 @@ public class TestClass
 
             var expected = @"public override string ToString()
 {
-    StringBuilder stringBuilder = new StringBuilder();
+    System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
     stringBuilder.Append(""TestClass { "");
     stringBuilder.Append(""TestProperty = "");
     stringBuilder.Append(this.TestProperty);
@@ -49,7 +48,7 @@ public class TestClass
     return stringBuilder.ToString();
 }";
 
-            actual.ShouldBe(expected);
+            CodeDiffer.AssertEqual(expected, actual);
         }
     }
 }

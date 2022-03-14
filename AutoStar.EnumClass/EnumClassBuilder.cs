@@ -9,12 +9,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace AutoStar.EnumClass
 {
-    internal class Scanner
+    internal class EnumClassBuilder
     {
         private readonly MarkerAttribute _attribute;
         private readonly Compilation _compilation;
 
-        public Scanner(
+        public EnumClassBuilder(
             MarkerAttribute attribute,
             Compilation compilation)
         {

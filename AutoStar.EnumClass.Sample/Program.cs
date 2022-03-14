@@ -20,11 +20,6 @@ namespace AutoStar.EnumClass.Sample
                     Console.WriteLine("We have a B");
 
                     break;
-
-                default:
-                    Console.WriteLine("We have an unknown service");
-
-                    break;
             }
         }
     }

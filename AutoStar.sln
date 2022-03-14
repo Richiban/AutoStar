@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30717.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.BuilderPattern", "AutoStar.BuilderPattern\AutoStar.BuilderPattern.csproj", "{D278F747-2921-4CEF-BD8A-0E6973F29732}"
 EndProject
@@ -11,27 +11,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.PrimaryConstructor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.PrimaryConstructor.Sample", "AutoStar.PrimaryConstructor.Sample\AutoStar.PrimaryConstructor.Sample.csproj", "{6EE48DB8-F16A-44DD-8371-D80357A5E7E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.PimaryConstructor.Tests", "AutoStar.PrimaryConstructor.Tests\AutoStar.PimaryConstructor.Tests.csproj", "{E48C819B-8F52-40B9-8676-E5F3E0279E73}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.PimaryConstructor.Tests", "AutoStar.PrimaryConstructor.Tests\AutoStar.PimaryConstructor.Tests.csproj", "{E48C819B-8F52-40B9-8676-E5F3E0279E73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.EnumClass", "AutoStar.EnumClass\AutoStar.EnumClass.csproj", "{0F01A9D1-7223-46DC-8D84-EC5971D9BC55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.EnumClass", "AutoStar.EnumClass\AutoStar.EnumClass.csproj", "{0F01A9D1-7223-46DC-8D84-EC5971D9BC55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.EnumClass.Sample", "AutoStar.EnumClass.Sample\AutoStar.EnumClass.Sample.csproj", "{E79F4661-FD21-4577-B710-0A6DFD08E7B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.EnumClass.Sample", "AutoStar.EnumClass.Sample\AutoStar.EnumClass.Sample.csproj", "{E79F4661-FD21-4577-B710-0A6DFD08E7B4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PimaryConstructor", "PimaryConstructor", "{9A06D388-F84A-44A5-8BEF-53685067FBC0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EnumClass", "EnumClass", "{0DB29D68-E726-4756-812D-1DAB8EE800E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.EnumClass.Tests", "AutoStar.EnumClass.Tests\AutoStar.EnumClass.Tests.csproj", "{220FA5A7-13FD-4AF1-B1C2-281297407F9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.EnumClass.Tests", "AutoStar.EnumClass.Tests\AutoStar.EnumClass.Tests.csproj", "{220FA5A7-13FD-4AF1-B1C2-281297407F9C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuilderPattern", "BuilderPattern", "{50775ECC-6729-46EF-A458-3FA4E9C53781}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.BuilderPattern.Tests", "AutoStar.BuilderPattern.Tests\AutoStar.BuilderPattern.Tests.csproj", "{45944833-2518-462C-A8A6-D0B903536433}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.BuilderPattern.Tests", "AutoStar.BuilderPattern.Tests\AutoStar.BuilderPattern.Tests.csproj", "{45944833-2518-462C-A8A6-D0B903536433}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.Common", "AutoStar.Common\AutoStar.Common.csproj", "{72141036-B3EB-4175-A547-05DE4C162CA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.Common", "AutoStar.Common\AutoStar.Common.csproj", "{72141036-B3EB-4175-A547-05DE4C162CA6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{9D963C92-9D1D-46F3-83CE-9C67EE9AE102}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.Common.Tests", "AutoStar.Common.Tests\AutoStar.Common.Tests.csproj", "{8BDCEE97-1C12-4F37-B3D6-DC08D267390D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoStar.Common.Tests", "AutoStar.Common.Tests\AutoStar.Common.Tests.csproj", "{8BDCEE97-1C12-4F37-B3D6-DC08D267390D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoStar.Tests.Common", "Tests.Common\AutoStar.Tests.Common.csproj", "{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -175,24 +177,36 @@ Global
 		{8BDCEE97-1C12-4F37-B3D6-DC08D267390D}.Release|x64.Build.0 = Release|Any CPU
 		{8BDCEE97-1C12-4F37-B3D6-DC08D267390D}.Release|x86.ActiveCfg = Release|Any CPU
 		{8BDCEE97-1C12-4F37-B3D6-DC08D267390D}.Release|x86.Build.0 = Release|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Debug|x64.Build.0 = Debug|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Release|x64.ActiveCfg = Release|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Release|x64.Build.0 = Release|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{0204CB87-E1D9-47AB-81C2-5C286A4D57DD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {78CB671D-3D91-4808-9903-4A07503D877A}
-	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{D278F747-2921-4CEF-BD8A-0E6973F29732} = {50775ECC-6729-46EF-A458-3FA4E9C53781}
+		{D5E24449-8A71-4D96-B0C0-7BB8CB479817} = {50775ECC-6729-46EF-A458-3FA4E9C53781}
 		{F25A241B-F370-4B26-9818-0F6D804C041C} = {9A06D388-F84A-44A5-8BEF-53685067FBC0}
+		{6EE48DB8-F16A-44DD-8371-D80357A5E7E4} = {9A06D388-F84A-44A5-8BEF-53685067FBC0}
 		{E48C819B-8F52-40B9-8676-E5F3E0279E73} = {9A06D388-F84A-44A5-8BEF-53685067FBC0}
 		{0F01A9D1-7223-46DC-8D84-EC5971D9BC55} = {0DB29D68-E726-4756-812D-1DAB8EE800E5}
 		{E79F4661-FD21-4577-B710-0A6DFD08E7B4} = {0DB29D68-E726-4756-812D-1DAB8EE800E5}
-		{6EE48DB8-F16A-44DD-8371-D80357A5E7E4} = {9A06D388-F84A-44A5-8BEF-53685067FBC0}
 		{220FA5A7-13FD-4AF1-B1C2-281297407F9C} = {0DB29D68-E726-4756-812D-1DAB8EE800E5}
-		{D278F747-2921-4CEF-BD8A-0E6973F29732} = {50775ECC-6729-46EF-A458-3FA4E9C53781}
-		{D5E24449-8A71-4D96-B0C0-7BB8CB479817} = {50775ECC-6729-46EF-A458-3FA4E9C53781}
 		{45944833-2518-462C-A8A6-D0B903536433} = {50775ECC-6729-46EF-A458-3FA4E9C53781}
 		{72141036-B3EB-4175-A547-05DE4C162CA6} = {9D963C92-9D1D-46F3-83CE-9C67EE9AE102}
 		{8BDCEE97-1C12-4F37-B3D6-DC08D267390D} = {9D963C92-9D1D-46F3-83CE-9C67EE9AE102}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {78CB671D-3D91-4808-9903-4A07503D877A}
 	EndGlobalSection
 EndGlobal

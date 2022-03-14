@@ -2,6 +2,9 @@
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Linq;
+using AutoStar.Tests.Common;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using NUnit.Framework;
@@ -12,6 +15,9 @@ namespace AutoStar.EnumClass.Tests
     [TestFixture]
     internal class GeneratorTests
     {
+        private readonly GeneratorTestRunner _generatorTestRunner =
+            new(new EnumClassSourceGenerator());
+
         [Test]
         public void InjectedAttributeFileTest()
         {
@@ -22,11 +28,12 @@ public partial class TestClass
 }
 ";
 
-            var (outputCompilation, diagnostics) = RunGenerator(source);
+            var runResult =
+                _generatorTestRunner.RunGenerator(source);
 
-            diagnostics.ShouldBeEmpty();
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            var src = GetSourceFile(outputCompilation, "EnumClassAttribute.cs")
+            var src = runResult.GetSourceFile("EnumClassAttribute.cs")
                 .GetText()
                 .ToString();
 
@@ -48,13 +55,14 @@ public partial class TestClass
 }
 ";
 
-            var (outputCompilation, diagnostics) = RunGenerator(source);
+            var runResult =
+                _generatorTestRunner.RunGenerator(source);
 
-            diagnostics.ShouldBeEmpty();
+            runResult.Diagnostics.ShouldBeEmpty();
 
-            outputCompilation.SyntaxTrees.Count().ShouldBe(expected: 2);
+            runResult.OutputCompilation.SyntaxTrees.Count().ShouldBe(expected: 2);
 
-            outputCompilation.SyntaxTrees.Select(s => s.FilePath)
+            runResult.OutputCompilation.SyntaxTrees.Select(s => s.FilePath)
                 .ShouldBe(
                     new[]
                     {
@@ -81,11 +89,11 @@ namespace TestSamples
 }
 ";
 
-            var (_, diagnostics) = RunGenerator(source);
+            var (_, diagnostics) = _generatorTestRunner.RunGenerator(source);
 
             var diagnostic = diagnostics.ShouldHaveSingleItem();
-            diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
             diagnostic.Id.ShouldBe("ASEC0001");
+            diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
 
             diagnostic.GetMessage()
                 .ShouldBe(
@@ -112,7 +120,7 @@ namespace TestSamples
 }
 ";
 
-            var (_, diagnostics) = RunGenerator(source);
+            var (_, diagnostics) = _generatorTestRunner.RunGenerator(source);
 
             var diagnostic = diagnostics.ShouldHaveSingleItem();
             diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
@@ -138,11 +146,11 @@ namespace TestSamples
 }
 ";
 
-            var (compilation, diagnostics) = RunGenerator(source);
+            var runResult = _generatorTestRunner.RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            Assert.That(runResult.Diagnostics, Is.Empty);
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+            var programText = runResult.GetSourceFile("TestClass.g.cs")
                 .GetText()
                 .ToString();
 
@@ -175,34 +183,47 @@ namespace TestSamples
     [EnumClass]
     public partial class TestClass
     {
-        partial class TypeA {}
+        partial class TypeA { public string PropA { get; set; } }
         partial class TypeB {}
 
         [EnumClass]
         partial class TypeC
         {
             partial class TypeD {}
-            partial class TypeE {}
+            partial class TypeE { public string PropE { get; set; } }
         }
     }
 }
 ";
 
-            var (compilation, diagnostics) = RunGenerator(source);
+            var runResult = _generatorTestRunner.RunGenerator(source);
 
-            Assert.That(diagnostics, Is.Empty);
+            Assert.That(runResult.Diagnostics, Is.Empty);
 
-            var programText = GetSourceFile(compilation, "TestClass.g.cs")
+            var programText = runResult.GetSourceFile("TestClass.g.cs")
                 .GetText()
                 .ToString();
 
-            programText.ShouldBe(
-                @"namespace TestSamples
+            var expected = @"namespace TestSamples
 {
     public abstract partial class TestClass
     {
         private TestClass()
         {
+        }
+
+        public override bool Equals(object other) => other is TestClass otherClass && Equals(otherClass);
+        public bool Equals(TestClass other)
+        {
+            return other != null;
+        }
+
+        public override string ToString()
+        {
+            System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.Append(""TestClass { "");
+            stringBuilder.Append("" }"");
+            return stringBuilder.ToString();
         }
 
         public sealed partial class TypeA : TestClass
@@ -219,6 +240,20 @@ namespace TestSamples
             {
             }
 
+            public override bool Equals(object other) => other is TypeC otherClass && Equals(otherClass);
+            public bool Equals(TypeC other)
+            {
+                return other != null;
+            }
+
+            public override string ToString()
+            {
+                System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+                stringBuilder.Append(""TypeC { "");
+                stringBuilder.Append("" }"");
+                return stringBuilder.ToString();
+            }
+
             public sealed partial class TypeD : TypeC
             {
             }
@@ -228,39 +263,9 @@ namespace TestSamples
             }
         }
     }
-}");
-        }
+}";
 
-        private static SyntaxTree GetSourceFile(
-            Compilation outputCompilation,
-            string fileName)
-        {
-            return outputCompilation.SyntaxTrees.Single(
-                s => s.FilePath.EndsWith(fileName));
-        }
-
-        private static (Compilation, ImmutableArray<Diagnostic>) RunGenerator(
-            string source)
-        {
-            var inputCompilation = CSharpCompilation.Create(
-                "compilation",
-                new[] { CSharpSyntaxTree.ParseText(source) },
-                new[]
-                {
-                    MetadataReference.CreateFromFile(
-                        typeof(Binder).GetTypeInfo().Assembly.Location)
-                },
-                new CSharpCompilationOptions(OutputKind.ConsoleApplication));
-
-            var generator = new EnumClassSourceGenerator();
-
-            var driver = CSharpGeneratorDriver.Create(generator)
-                .RunGeneratorsAndUpdateCompilation(
-                    inputCompilation,
-                    out var outputCompilation,
-                    out var diagnostics);
-
-            return (outputCompilation, diagnostics);
+            CodeDiffer.AssertEqual(expected, programText);
         }
     }
 }

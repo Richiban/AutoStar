@@ -8,7 +8,7 @@ namespace AutoStar.PrimaryConstructor.Sample
         {
             Console.WriteLine("==== Auto-constructor Validation ====");
 
-            var myDataClass = new Service(Guid.NewGuid(), "srtras");
+            var myDataClass = new Service(Guid.NewGuid(), "A string");
 
             Console.WriteLine(myDataClass);
         }
